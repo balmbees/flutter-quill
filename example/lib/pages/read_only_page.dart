@@ -39,18 +39,6 @@ class _ReadOnlyPageState extends State<ReadOnlyPage> {
       expands: false,
       padding: EdgeInsets.zero,
     );
-    if (kIsWeb) {
-      quillEditor = QuillEditor(
-          controller: controller,
-          scrollController: ScrollController(),
-          scrollable: true,
-          focusNode: _focusNode,
-          autoFocus: true,
-          readOnly: !_edit,
-          expands: false,
-          padding: EdgeInsets.zero,
-          embedBuilder: defaultEmbedBuilderWeb);
-    }
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Container(

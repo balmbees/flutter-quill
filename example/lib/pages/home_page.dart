@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
+
 import 'package:path/path.dart';
+import 'package:string_validator/string_validator.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -18,6 +22,46 @@ import 'read_only_page.dart';
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
+}
+
+List<Map<String, dynamic>> convertFromBlockToQuill(String result) {
+  // Convert format from moim block to quill delta.
+  var contentList = jsonDecode(result);
+  var convertedContentList = <Map<String, dynamic>>[];
+
+  for (var content in contentList) {
+    if (content['type'] == 'text') {
+      if (content['content'] == '' || content['content'] == null) {
+        content['content'] = '\n';
+      }
+
+      var item = {
+        'insert': content['content'],
+      };
+
+      convertedContentList.add(item);
+    } else {
+      convertedContentList.add(
+        {
+          'insert': {
+            content['type'] as String: content,
+          },
+        },
+      );
+    }
+  }
+
+  convertedContentList.add(
+    {
+      "insert": "\n",
+    },
+  );
+
+  for (var content in convertedContentList) {
+    log('convertedContent: $content');
+  }
+
+  return convertedContentList;
 }
 
 class _HomePageState extends State<HomePage> {
@@ -33,7 +77,11 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadFromAssets() async {
     try {
       final result = await rootBundle.loadString('assets/sample_data.json');
-      final doc = Document.fromJson(jsonDecode(result));
+
+      final doc = Document.fromJson(
+        convertFromBlockToQuill(result),
+      );
+
       setState(() {
         _controller = QuillController(
             document: doc, selection: const TextSelection.collapsed(offset: 0));
@@ -59,9 +107,8 @@ class _HomePageState extends State<HomePage> {
         elevation: 0,
         centerTitle: false,
         title: const Text(
-          'Flutter Quill',
+          'Editor',
         ),
-        actions: [],
       ),
       drawer: Container(
         constraints:
@@ -86,75 +133,75 @@ class _HomePageState extends State<HomePage> {
           }
         },
         child: _buildWelcomeEditor(context),
-      ),
+      ),      
     );
+  }
+
+  String _standardizeImageUrl(String url) {
+    if (url.contains('base64')) {
+      return url.split(',')[1];
+    }
+    return url;
+  }
+
+  Widget moimEmbedBuilder(BuildContext context, Embed node) {
+    assert(!kIsWeb, 'Please provide EmbedBuilder for Web');
+    switch (node.value.type) {
+      case 'image':
+        final imageUrl = _standardizeImageUrl(node.value.data);
+        return imageUrl.startsWith('http')
+            ? Image.network(imageUrl)
+            : isBase64(imageUrl)
+                ? Image.memory(base64.decode(imageUrl))
+                : Image.file(File(imageUrl));
+      case 'link-preview':
+        return Text(
+          '--link-preview: not supported format ...',
+          style: TextStyle(
+            color: Colors.red,
+          ),
+        );
+      case 'file':
+        return Text(
+          '--file: not supported format ...',
+          style: TextStyle(
+            color: Colors.red,
+          ),
+        );
+      default:
+        return SizedBox();
+    }
   }
 
   Widget _buildWelcomeEditor(BuildContext context) {
     var quillEditor = QuillEditor(
-        controller: _controller!,
-        scrollController: ScrollController(),
-        scrollable: true,
-        focusNode: _focusNode,
-        autoFocus: false,
-        readOnly: false,
-        placeholder: 'Add content',
-        expands: false,
-        padding: EdgeInsets.zero,
-        customStyles: DefaultStyles(
-          h1: DefaultTextBlockStyle(
-              const TextStyle(
-                fontSize: 32,
-                color: Colors.black,
-                height: 1.15,
-                fontWeight: FontWeight.w300,
-              ),
-              const Tuple2(16, 0),
-              const Tuple2(0, 0),
-              null),
-          sizeSmall: const TextStyle(fontSize: 9),
-        ));
-    if (kIsWeb) {
-      quillEditor = QuillEditor(
-          controller: _controller!,
-          scrollController: ScrollController(),
-          scrollable: true,
-          focusNode: _focusNode,
-          autoFocus: false,
-          readOnly: false,
-          placeholder: 'Add content',
-          expands: false,
-          padding: EdgeInsets.zero,
-          customStyles: DefaultStyles(
-            h1: DefaultTextBlockStyle(
-                const TextStyle(
-                  fontSize: 32,
-                  color: Colors.black,
-                  height: 1.15,
-                  fontWeight: FontWeight.w300,
-                ),
-                const Tuple2(16, 0),
-                const Tuple2(0, 0),
-                null),
-            sizeSmall: const TextStyle(fontSize: 9),
-          ),
-          embedBuilder: defaultEmbedBuilderWeb);
-    }
+      controller: _controller!,
+      scrollController: ScrollController(),
+      scrollable: true,
+      focusNode: _focusNode,
+      autoFocus: false,
+      readOnly: false,
+      placeholder: 'Add content',
+      expands: false,
+      padding: EdgeInsets.zero,
+      customStyles: DefaultStyles(
+        h1: DefaultTextBlockStyle(
+            const TextStyle(
+              fontSize: 32,
+              color: Colors.black,
+              height: 1.15,
+              fontWeight: FontWeight.w300,
+            ),
+            const Tuple2(16, 0),
+            const Tuple2(0, 0),
+            null),
+        sizeSmall: const TextStyle(fontSize: 9),
+      ),
+      embedBuilder: moimEmbedBuilder,
+    );
+
     var toolbar = QuillToolbar.basic(
         controller: _controller!, onImagePickCallback: _onImagePickCallback);
-    if (kIsWeb) {
-      toolbar = QuillToolbar.basic(
-          controller: _controller!,
-          onImagePickCallback: _onImagePickCallback,
-          webImagePickImpl: _webImagePickImpl);
-    }
-    final isDesktop = !kIsWeb && !Platform.isAndroid && !Platform.isIOS;
-    if (isDesktop) {
-      toolbar = QuillToolbar.basic(
-          controller: _controller!,
-          onImagePickCallback: _onImagePickCallback,
-          filePickImpl: openFileSystemPickerForDesktop);
-    }
 
     return SafeArea(
       child: Column(
@@ -168,14 +215,7 @@ class _HomePageState extends State<HomePage> {
               child: quillEditor,
             ),
           ),
-          kIsWeb
-              ? Expanded(
-                  child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                  child: toolbar,
-                ))
-              : Container(child: toolbar)
+          Container(child: toolbar),
         ],
       ),
     );
@@ -199,20 +239,6 @@ class _HomePageState extends State<HomePage> {
     final copiedFile =
         await file.copy('${appDocDir.path}/${basename(file.path)}');
     return copiedFile.path.toString();
-  }
-
-  Future<String?> _webImagePickImpl(
-      OnImagePickCallback onImagePickCallback) async {
-    final result = await FilePicker.platform.pickFiles();
-    if (result == null) {
-      return null;
-    }
-
-    // Take first, because we don't allow picking multiple files.
-    final fileName = result.files.first.name;
-    final file = File(fileName);
-
-    return onImagePickCallback(file);
   }
 
   Widget _buildMenuBar(BuildContext context) {

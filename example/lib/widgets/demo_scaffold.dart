@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:filesystem_picker/filesystem_picker.dart';
@@ -10,6 +11,46 @@ import 'package:path_provider/path_provider.dart';
 
 typedef DemoContentBuilder = Widget Function(
     BuildContext context, QuillController? controller);
+
+List<Map<String, dynamic>> convertFromBlockToQuill(String result) {
+  // Convert format from moim block to quill delta.
+  var contentList = jsonDecode(result);
+  var convertedContentList = <Map<String, dynamic>>[];
+
+  for (var content in contentList) {
+    if (content['type'] == 'text') {
+      if (content['content'] == '' || content['content'] == null) {
+        content['content'] = '\n';
+      }
+
+      var item = {
+        'insert': content['content'],
+      };
+
+      convertedContentList.add(item);
+    } else {
+      convertedContentList.add(
+        {
+          'insert': {
+            content['type'] as String: content,
+          },
+        },
+      );
+    }
+  }
+
+  convertedContentList.add(
+    {
+      "insert": "\n",
+    },
+  );
+
+  for (var content in convertedContentList) {
+    log('convertedContent: $content');
+  }
+
+  return convertedContentList;
+}
 
 // Common scaffold for all examples.
 class DemoScaffold extends StatefulWidget {
@@ -58,7 +99,11 @@ class _DemoScaffoldState extends State<DemoScaffold> {
     try {
       final result =
           await rootBundle.loadString('assets/${widget.documentFilename}');
-      final doc = Document.fromJson(jsonDecode(result));
+
+      final doc = Document.fromJson(
+        convertFromBlockToQuill(result),
+      );
+
       setState(() {
         _controller = QuillController(
             document: doc, selection: const TextSelection.collapsed(offset: 0));
@@ -87,12 +132,7 @@ class _DemoScaffoldState extends State<DemoScaffold> {
   Widget build(BuildContext context) {
     final actions = widget.actions ?? <Widget>[];
     var toolbar = QuillToolbar.basic(controller: _controller!);
-    final isDesktop = !kIsWeb && !Platform.isAndroid && !Platform.isIOS;
-    if (isDesktop) {
-      toolbar = QuillToolbar.basic(
-          controller: _controller!,
-          filePickImpl: openFileSystemPickerForDesktop);
-    }
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
