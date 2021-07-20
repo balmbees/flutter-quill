@@ -30,10 +30,62 @@ class _HomePageState extends State<HomePage> {
     _loadFromAssets();
   }
 
+  List<Map<String, dynamic>> convertFromBlockToQuill(
+    var contentList,
+  ) {
+    // Convert format from moim block to quill delta.
+    var convertedContentList = <Map<String, dynamic>>[];
+
+    for (var content in contentList) {
+      if (content['type'] == 'text') {
+        if (content['content'] == '' || content['content'] == null) {
+          content['content'] = '\n';
+        }
+
+        var item = {
+          'insert': content['content'],
+        };
+
+        convertedContentList.add(item);
+      } else if (content['type'] == 'link-preview') {
+        convertedContentList.add(
+          {
+            'insert': {
+              content['type'] as String: content,
+            },
+          },
+        );
+      }
+    }
+
+    convertedContentList.add(
+      {
+        "insert": "\n",
+      },
+    );
+
+    for (var content in convertedContentList) {
+      print('convertedContent: $content');
+    }
+
+    return convertedContentList;
+  }
+
   Future<void> _loadFromAssets() async {
     try {
+      final moimResult = await rootBundle.loadString('assets/moim_data.json');
+
       final result = await rootBundle.loadString('assets/sample_data.json');
-      final doc = Document.fromJson(jsonDecode(result));
+
+      final doc = Document.fromJson(
+        convertFromBlockToQuill(
+          jsonDecode(
+            moimResult,
+          ),
+        ),
+      );
+
+      // final doc = Document.fromJson(jsonDecode(result));
       setState(() {
         _controller = QuillController(
             document: doc, selection: const TextSelection.collapsed(offset: 0));
@@ -90,30 +142,44 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget moimEmbedBuilder(BuildContext context, Embed node) {
+    switch (node.value.type) {
+      case 'link-preview':
+        print('write link-preview');
+
+        return Text('not supported format');
+
+      default:
+        return SizedBox();
+    }
+  }
+
   Widget _buildWelcomeEditor(BuildContext context) {
     var quillEditor = QuillEditor(
-        controller: _controller!,
-        scrollController: ScrollController(),
-        scrollable: true,
-        focusNode: _focusNode,
-        autoFocus: false,
-        readOnly: false,
-        placeholder: 'Add content',
-        expands: false,
-        padding: EdgeInsets.zero,
-        customStyles: DefaultStyles(
-          h1: DefaultTextBlockStyle(
-              const TextStyle(
-                fontSize: 32,
-                color: Colors.black,
-                height: 1.15,
-                fontWeight: FontWeight.w300,
-              ),
-              const Tuple2(16, 0),
-              const Tuple2(0, 0),
-              null),
-          sizeSmall: const TextStyle(fontSize: 9),
-        ));
+      controller: _controller!,
+      scrollController: ScrollController(),
+      scrollable: true,
+      focusNode: _focusNode,
+      autoFocus: false,
+      readOnly: false,
+      placeholder: 'Add content',
+      expands: false,
+      padding: EdgeInsets.zero,
+      customStyles: DefaultStyles(
+        h1: DefaultTextBlockStyle(
+            const TextStyle(
+              fontSize: 32,
+              color: Colors.black,
+              height: 1.15,
+              fontWeight: FontWeight.w300,
+            ),
+            const Tuple2(16, 0),
+            const Tuple2(0, 0),
+            null),
+        sizeSmall: const TextStyle(fontSize: 9),
+      ),
+      embedBuilder: moimEmbedBuilder,
+    );
     if (kIsWeb) {
       quillEditor = QuillEditor(
           controller: _controller!,
