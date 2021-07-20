@@ -105,27 +105,12 @@ Widget _defaultEmbedBuilder(BuildContext context, leaf.Embed node) {
           : isBase64(imageUrl)
               ? Image.memory(base64.decode(imageUrl))
               : Image.file(io.File(imageUrl));
-    case 'link-preview':
-      return Text(
-        'link-preview: not supported format ...',
-        style: TextStyle(
-          color: Colors.red,
-        ),
-      );
-    case 'file':
-      return Text(
-        'file: not supported format ...',
-        style: TextStyle(
-          color: Colors.red,
-        ),
-      );
     default:
-      return SizedBox();
-    // throw UnimplementedError(
-    //   'Embeddable type "${node.value.type}" is not supported by default '
-    //   'embed builder of QuillEditor. You must pass your own builder function '
-    //   'to embedBuilder property of QuillEditor or QuillField widgets.',
-    // );
+      throw UnimplementedError(
+        'Embeddable type "${node.value.type}" is not supported by default '
+        'embed builder of QuillEditor. You must pass your own builder function '
+        'to embedBuilder property of QuillEditor or QuillField widgets.',
+      );
   }
 }
 
