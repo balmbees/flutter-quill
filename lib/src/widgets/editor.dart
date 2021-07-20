@@ -106,11 +106,12 @@ Widget _defaultEmbedBuilder(BuildContext context, leaf.Embed node) {
               ? Image.memory(base64.decode(imageUrl))
               : Image.file(io.File(imageUrl));
     default:
-      throw UnimplementedError(
-        'Embeddable type "${node.value.type}" is not supported by default '
-        'embed builder of QuillEditor. You must pass your own builder function '
-        'to embedBuilder property of QuillEditor or QuillField widgets.',
-      );
+      return Text('not supported type');
+      // throw UnimplementedError(
+      //   'Embeddable type "${node.value.type}" is not supported by default '
+      //   'embed builder of QuillEditor. You must pass your own builder function '
+      //   'to embedBuilder property of QuillEditor or QuillField widgets.',
+      // );
   }
 }
 

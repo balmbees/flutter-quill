@@ -72,7 +72,12 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
     bool showIndent = true,
     bool showLink = true,
     bool showHistory = true,
+
+    // For BlockIt Embed type.
     bool showHorizontalRule = false,
+    bool showLinkPreviewRule = true,
+    bool showFileRule = true,
+    bool showUserRule = true,
     bool multiRowsDisplay = true,
     bool showCamera = true,
     OnImagePickCallback? onImagePickCallback,
@@ -93,7 +98,11 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
       showHeaderStyle,
       showListNumbers || showListBullets || showListCheck || showCodeBlock,
       showQuote || showIndent,
-      showLink || showHorizontalRule
+      showLink ||
+          showHorizontalRule ||
+          showLinkPreviewRule ||
+          showFileRule ||
+          showUserRule,
     ];
 
     return QuillToolbar(
@@ -276,8 +285,32 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
           ),
         if (showHorizontalRule)
           InsertEmbedButton(
+            type: 'horizontal',
             controller: controller,
             icon: Icons.horizontal_rule,
+            iconSize: toolbarIconSize,
+          ),
+
+        // For BlokIt.
+        if (showLinkPreviewRule)
+          InsertEmbedButton(
+            type: 'link-preview',
+            controller: controller,
+            icon: Icons.link_rounded,
+            iconSize: toolbarIconSize,
+          ),
+        if (showFileRule)
+          InsertEmbedButton(
+            type: 'file',
+            controller: controller,
+            icon: Icons.file_download_rounded,
+            iconSize: toolbarIconSize,
+          ),
+        if (showUserRule)
+          InsertEmbedButton(
+            type: 'user',
+            controller: controller,
+            icon: Icons.people_rounded,
             iconSize: toolbarIconSize,
           ),
       ],

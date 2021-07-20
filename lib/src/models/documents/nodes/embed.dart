@@ -32,11 +32,53 @@ class Embeddable {
 /// the document model itself does not make any assumptions about the types
 /// of embedded objects and allows users to define their own types.
 class BlockEmbed extends Embeddable {
-  const BlockEmbed(String type, dynamic data) : super(type, data);
+  const BlockEmbed(
+    String type,
+    dynamic data,
+  ) : super(
+          type,
+          data,
+        );
 
   static const String horizontalRuleType = 'divider';
-  static BlockEmbed horizontalRule = BlockEmbed(horizontalRuleType, 'hr');
+  static BlockEmbed horizontalRule = BlockEmbed(
+    horizontalRuleType,
+    'hr',
+  );
 
   static const String imageType = 'image';
-  static BlockEmbed image(String imageUrl) => BlockEmbed(imageType, imageUrl);
+  static BlockEmbed image(
+    String imageUrl,
+  ) =>
+      BlockEmbed(
+        imageType,
+        imageUrl,
+      );
+
+  static const String linkPreviewType = 'link-preview';
+  static BlockEmbed linkPreviewRule(
+    var data,
+  ) =>
+      BlockEmbed(
+        linkPreviewType,
+        data,
+      );
+
+  static const String fileType = 'file';
+  static BlockEmbed fileRule(
+    var data,
+  ) =>
+      BlockEmbed(
+        fileType,
+        data,
+      );
+
+  static const String userType = 'user';
+  static BlockEmbed userRule(
+    var data,
+  ) =>
+      BlockEmbed(
+        userType,
+        data,
+      );
 }

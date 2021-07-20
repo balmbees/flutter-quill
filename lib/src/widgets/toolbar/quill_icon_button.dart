@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+// typedef dataCallback = void Function(dynamic data);
+
 class QuillIconButton extends StatelessWidget {
   const QuillIconButton({
     required this.onPressed,
+    // this.onPressedWithData,
     this.icon,
     this.size = 40,
     this.fillColor,
@@ -11,6 +14,7 @@ class QuillIconButton extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  // final dataCallback? onPressedWithData;
   final VoidCallback? onPressed;
   final Widget? icon;
   final double size;
