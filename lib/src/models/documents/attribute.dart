@@ -37,6 +37,7 @@ class Attribute<T> {
     Attribute.height.key: Attribute.height,
     Attribute.style.key: Attribute.style,
     Attribute.token.key: Attribute.token,
+    Attribute.link_preview.key: Attribute.link_preview,
   });
 
   static final BoldAttribute bold = BoldAttribute();
@@ -78,6 +79,8 @@ class Attribute<T> {
   static final StyleAttribute style = StyleAttribute(null);
 
   static final TokenAttribute token = TokenAttribute('');
+
+  static final LinkPreviewAttribute link_preview = LinkPreviewAttribute('');
 
   static final Set<String> inlineKeys = {
     Attribute.bold.key,
@@ -289,4 +292,13 @@ class StyleAttribute extends Attribute<String?> {
 
 class TokenAttribute extends Attribute<String> {
   TokenAttribute(String val) : super('token', AttributeScope.IGNORE, val);
+}
+
+class LinkPreviewAttribute extends Attribute<String> {
+  LinkPreviewAttribute(dynamic data)
+      : super(
+          'link-preview',
+          AttributeScope.EMBEDS,
+          data,
+        );
 }

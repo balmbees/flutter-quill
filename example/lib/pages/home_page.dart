@@ -51,8 +51,12 @@ class _HomePageState extends State<HomePage> {
         convertedContentList.add(
           {
             'insert': {
-              content['type'] as String: content,
+              // content['type'] as String: content,
+              content['type'] as String: 'link data',
             },
+            'attributes': {
+              content['type'] as String: content,
+            }
           },
         );
       }
@@ -150,7 +154,7 @@ class _HomePageState extends State<HomePage> {
         return Text('not supported format');
 
       default:
-        return SizedBox();
+        return Text('not supported format');
     }
   }
 
