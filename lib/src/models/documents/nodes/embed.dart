@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 /// An object which can be embedded into a Quill document.
 ///
 /// See also:
@@ -34,19 +32,11 @@ class Embeddable {
 /// the document model itself does not make any assumptions about the types
 /// of embedded objects and allows users to define their own types.
 class BlockEmbed extends Embeddable {
-  BlockEmbed(String type, dynamic data) : super(type, data) {
-    log('-- type: $type');
-    log('-- data: $data');
-  }
+  const BlockEmbed(String type, dynamic data) : super(type, data) {
 
   static const String horizontalRuleType = 'divider';
   static BlockEmbed horizontalRule = BlockEmbed(horizontalRuleType, 'hr');
 
   static const String imageType = 'image';
   static BlockEmbed image(String imageUrl) => BlockEmbed(imageType, imageUrl);
-
-  static const String linkType = 'link-preview';
-  static BlockEmbed linkPreview(dynamic data) {
-    return BlockEmbed(linkType, data);
-  }
 }
