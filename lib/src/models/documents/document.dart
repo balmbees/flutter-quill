@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:tuple/tuple.dart';
 
@@ -198,9 +197,6 @@ class Document {
       {bool autoAppendNewlineAfterImage = true}) {
     final res = Delta();
     final ops = delta.toList();
-
-    // log('ops len: ${ops.length}');
-
     for (var i = 0; i < ops.length; i++) {
       final op = ops[i];
       res.push(op);
@@ -256,10 +252,7 @@ class Document {
       throw ArgumentError.value(doc, 'Document Delta cannot be empty.');
     }
 
-    // assert((doc.last.data as String).endsWith('\n'));
-    var docList = doc.toList();
-
-    // log('doc.list len: ${docList.length}');
+    assert((doc.last.data as String).endsWith('\n'));
 
     var offset = 0;
     for (final op in doc.toList()) {
@@ -267,14 +260,9 @@ class Document {
         throw ArgumentError.value(doc,
             'Document can only contain insert operations but ${op.key} found.');
       }
-
       final style =
           op.attributes != null ? Style.fromJson(op.attributes) : null;
-
-      log('op.data: $op.data');
       final data = _normalize(op.data);
-      log('normalized data: $data');
-
       _root.insert(offset, data, style);
       offset += op.length!;
     }
