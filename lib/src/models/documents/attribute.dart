@@ -37,7 +37,9 @@ class Attribute<T> {
     Attribute.height.key: Attribute.height,
     Attribute.style.key: Attribute.style,
     Attribute.token.key: Attribute.token,
-    Attribute.link_preview.key: Attribute.link_preview,
+    // For moim block embed data.
+    Attribute.link_preview_block.key: Attribute.link_preview_block,
+    Attribute.file_block.key: Attribute.file_block,
   });
 
   static final BoldAttribute bold = BoldAttribute();
@@ -80,7 +82,15 @@ class Attribute<T> {
 
   static final TokenAttribute token = TokenAttribute('');
 
-  static final LinkPreviewAttribute link_preview = LinkPreviewAttribute('');
+  static final LinkPreviewAttribute link_preview_block =
+      LinkPreviewAttribute('');
+
+  static final FileAttribute file_block = FileAttribute('');
+
+  static final Set<String> embedKeys = {
+    Attribute.link_preview_block.key,
+    Attribute.file_block.key,
+  };
 
   static final Set<String> inlineKeys = {
     Attribute.bold.key,
@@ -298,6 +308,15 @@ class LinkPreviewAttribute extends Attribute<String> {
   LinkPreviewAttribute(dynamic data)
       : super(
           'link-preview',
+          AttributeScope.EMBEDS,
+          data,
+        );
+}
+
+class FileAttribute extends Attribute<String> {
+  FileAttribute(dynamic data)
+      : super(
+          'file',
           AttributeScope.EMBEDS,
           data,
         );

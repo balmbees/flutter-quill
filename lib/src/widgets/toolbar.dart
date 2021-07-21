@@ -79,6 +79,11 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
     FilePickImpl? filePickImpl,
     WebImagePickImpl? webImagePickImpl,
     Key? key,
+
+    // For moim block embed type.
+    bool showLinkPreviewRule = true,
+    bool showFileRule = true,
+    bool showUserRule = true,
   }) {
     final isButtonGroupShown = [
       showHistory ||
@@ -93,7 +98,8 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
       showHeaderStyle,
       showListNumbers || showListBullets || showListCheck || showCodeBlock,
       showQuote || showIndent,
-      showLink || showHorizontalRule
+      showLink || showHorizontalRule,
+      showLinkPreviewRule || showFileRule || showUserRule,
     ];
 
     return QuillToolbar(
@@ -278,6 +284,25 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
           InsertEmbedButton(
             controller: controller,
             icon: Icons.horizontal_rule,
+            iconSize: toolbarIconSize,
+          ),
+        // For moim block embed.
+        if (showLinkPreviewRule)
+          InsertEmbedButton(
+            controller: controller,
+            icon: Icons.link_rounded,
+            iconSize: toolbarIconSize,
+          ),
+        if (showFileRule)
+          InsertEmbedButton(
+            controller: controller,
+            icon: Icons.file_upload_rounded,
+            iconSize: toolbarIconSize,
+          ),
+        if (showUserRule)
+          InsertEmbedButton(
+            controller: controller,
+            icon: Icons.people_rounded,
             iconSize: toolbarIconSize,
           ),
       ],
