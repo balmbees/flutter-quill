@@ -14,7 +14,8 @@ abstract class InsertRule extends Rule {
   @override
   void validateArgs(int? len, Object? data, Attribute? attribute) {
     assert(data != null);
-    assert(attribute == null);
+    // TODO: Fix later.
+    // assert(attribute == null);
   }
 }
 
@@ -246,7 +247,11 @@ class InsertEmbedsRule extends InsertRule {
     final isNewlineAfter = textAfter.startsWith('\n');
 
     if (isNewlineBefore && isNewlineAfter) {
-      return delta..insert(data);
+      return delta
+        ..insert(
+          data,
+          // attribute.value,
+        );
     }
 
     Map<String, dynamic>? lineStyle;
@@ -265,7 +270,12 @@ class InsertEmbedsRule extends InsertRule {
     if (!isNewlineBefore) {
       delta.insert('\n', lineStyle);
     }
-    delta.insert(data);
+
+    delta.insert(
+      data,
+      attribute?.value,
+    );
+
     if (!isNewlineAfter) {
       delta.insert('\n');
     }

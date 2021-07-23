@@ -51,8 +51,13 @@ class Document {
 
   Stream<Tuple3<Delta, Delta, ChangeSource>> get changes => _observer.stream;
 
-  Delta insert(int index, Object? data,
-      {int replaceLength = 0, bool autoAppendNewlineAfterImage = true}) {
+  Delta insert(
+    int index,
+    Object? data, {
+    int replaceLength = 0,
+    bool autoAppendNewlineAfterImage = true,
+    Attribute? attribute,
+  }) {
     assert(index >= 0);
     assert(data is String || data is Embeddable);
     if (data is Embeddable) {
@@ -61,8 +66,14 @@ class Document {
       return Delta();
     }
 
-    final delta = _rules.apply(RuleType.INSERT, this, index,
-        data: data, len: replaceLength);
+    final delta = _rules.apply(
+      RuleType.INSERT,
+      this,
+      index,
+      data: data,
+      len: replaceLength,
+      attribute: attribute,
+    );
     compose(delta, ChangeSource.LOCAL,
         autoAppendNewlineAfterImage: autoAppendNewlineAfterImage);
     return delta;
@@ -77,8 +88,13 @@ class Document {
     return delta;
   }
 
-  Delta replace(int index, int len, Object? data,
-      {bool autoAppendNewlineAfterImage = true}) {
+  Delta replace(
+    int index,
+    int len,
+    Object? data, {
+    bool autoAppendNewlineAfterImage = true,
+    Attribute? attribute,
+  }) {
     assert(index >= 0);
     assert(data is String || data is Embeddable);
 
@@ -91,9 +107,13 @@ class Document {
     // We have to insert before applying delete rules
     // Otherwise delete would be operating on stale document snapshot.
     if (dataIsNotEmpty) {
-      delta = insert(index, data,
-          replaceLength: len,
-          autoAppendNewlineAfterImage: autoAppendNewlineAfterImage);
+      delta = insert(
+        index,
+        data,
+        replaceLength: len,
+        autoAppendNewlineAfterImage: autoAppendNewlineAfterImage,
+        attribute: attribute,
+      );
     }
 
     if (len > 0) {
