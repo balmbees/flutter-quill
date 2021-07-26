@@ -250,7 +250,7 @@ class InsertEmbedsRule extends InsertRule {
       return delta
         ..insert(
           data,
-          // attribute.value,
+          attribute?.value,
         );
     }
 
