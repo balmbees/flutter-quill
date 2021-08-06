@@ -46,6 +46,12 @@ class BlockEmbed extends Embeddable {
         imageUrl,
       );
 
+  static const String linkTextType = 'link-text';
+  static BlockEmbed linkTextBlockEmbed(String linkUrl) => BlockEmbed(
+        linkTextType,
+        linkUrl,
+      );
+
   static const String linkPreviewType = 'link-preview';
   static BlockEmbed linkPreviewBlockEmbed(String linkUrl) => BlockEmbed(
         linkPreviewType,

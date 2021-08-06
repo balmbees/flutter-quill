@@ -38,6 +38,7 @@ class Attribute<T> {
     Attribute.style.key: Attribute.style,
     Attribute.token.key: Attribute.token,
     // For moim block embed data.
+    Attribute.link_text_block.key: Attribute.link_text_block,
     Attribute.link_preview_block.key: Attribute.link_preview_block,
     Attribute.file_block.key: Attribute.file_block,
   });
@@ -82,15 +83,26 @@ class Attribute<T> {
 
   static final TokenAttribute token = TokenAttribute('');
 
+  // For moim block embed data.
+  static final LinkTextAttribute link_text_block = LinkTextAttribute('');
+
   static final LinkPreviewAttribute link_preview_block =
       LinkPreviewAttribute('');
 
   static final FileAttribute file_block = FileAttribute('');
 
+  // For moim block embed data.
   static final Set<String> embedKeys = {
+    Attribute.link_text_block.key,
     Attribute.link_preview_block.key,
     Attribute.file_block.key,
   };
+
+  // static final Set<String> inlineKeys = {
+  //   Attribute.bold.key,
+  //   Attribute.italic.key,
+  //   Attribute.underline.key,
+  // };
 
   static final Set<String> inlineKeys = {
     Attribute.bold.key,
@@ -302,6 +314,16 @@ class StyleAttribute extends Attribute<String?> {
 
 class TokenAttribute extends Attribute<String> {
   TokenAttribute(String val) : super('token', AttributeScope.IGNORE, val);
+}
+
+// For moim block embed data.
+class LinkTextAttribute extends Attribute<String> {
+  LinkTextAttribute(dynamic data)
+      : super(
+          'link-text',
+          AttributeScope.EMBEDS,
+          data,
+        );
 }
 
 class LinkPreviewAttribute extends Attribute<String> {
