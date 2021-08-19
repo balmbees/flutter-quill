@@ -37,10 +37,12 @@ class Attribute<T> {
     Attribute.height.key: Attribute.height,
     Attribute.style.key: Attribute.style,
     Attribute.token.key: Attribute.token,
+
     // For moim block embed data.
     Attribute.link_text_block.key: Attribute.link_text_block,
     Attribute.link_preview_block.key: Attribute.link_preview_block,
     Attribute.file_block.key: Attribute.file_block,
+    Attribute.user_block.key: Attribute.user_block,
   });
 
   static final BoldAttribute bold = BoldAttribute();
@@ -91,18 +93,15 @@ class Attribute<T> {
 
   static final FileAttribute file_block = FileAttribute('');
 
+  static final UserAttribute user_block = UserAttribute('');
+
   // For moim block embed data.
   static final Set<String> embedKeys = {
     Attribute.link_text_block.key,
     Attribute.link_preview_block.key,
     Attribute.file_block.key,
+    Attribute.user_block.key,
   };
-
-  // static final Set<String> inlineKeys = {
-  //   Attribute.bold.key,
-  //   Attribute.italic.key,
-  //   Attribute.underline.key,
-  // };
 
   static final Set<String> inlineKeys = {
     Attribute.bold.key,
@@ -339,6 +338,15 @@ class FileAttribute extends Attribute<String> {
   FileAttribute(dynamic data)
       : super(
           'file',
+          AttributeScope.EMBEDS,
+          data,
+        );
+}
+
+class UserAttribute extends Attribute<String> {
+  UserAttribute(dynamic data)
+      : super(
+          'user',
           AttributeScope.EMBEDS,
           data,
         );

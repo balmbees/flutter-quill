@@ -63,4 +63,10 @@ class BlockEmbed extends Embeddable {
         fileType,
         fileUrl,
       );
+
+  static const String userType = 'user';
+  static BlockEmbed userBlockEmbed(String userId) => BlockEmbed(
+        userType,
+        userId,
+      );
 }
