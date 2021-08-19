@@ -316,6 +316,8 @@ class TokenAttribute extends Attribute<String> {
 }
 
 // For moim block embed data.
+
+// TODO: Check the delta and content format.
 class LinkTextAttribute extends Attribute<String> {
   LinkTextAttribute(dynamic data)
       : super(
@@ -342,6 +344,23 @@ class FileAttribute extends Attribute<String> {
           data,
         );
 }
+
+// Example
+// For delta:
+// {
+//   "insert": {
+//     "user": "UX2KBOYAQ"
+//   },
+//   "attributes": {
+//     "user": "UX2KBOYAQ"
+//   }
+// }
+//
+// For content:
+// {
+//   "type": "text",
+//   "content": "<@UX2KBOYAQ ..."
+// }
 
 class UserAttribute extends Attribute<String> {
   UserAttribute(dynamic data)

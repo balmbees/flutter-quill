@@ -46,6 +46,7 @@ class BlockEmbed extends Embeddable {
         imageUrl,
       );
 
+  // Moim embed.
   static const String linkTextType = 'link-text';
   static BlockEmbed linkTextBlockEmbed(String linkUrl) => BlockEmbed(
         linkTextType,
