@@ -17,6 +17,7 @@ class Attribute<T> {
   final T value;
 
   static final Map<String, Attribute> _registry = LinkedHashMap.of({
+    Attribute.contentLine.key: Attribute.contentLine,
     Attribute.bold.key: Attribute.bold,
     Attribute.italic.key: Attribute.italic,
     Attribute.underline.key: Attribute.underline,
@@ -44,6 +45,9 @@ class Attribute<T> {
     Attribute.file_block.key: Attribute.file_block,
     Attribute.user_block.key: Attribute.user_block,
   });
+
+  // For content-line.
+  static final ContentLineAttribute contentLine = ContentLineAttribute();
 
   static final BoldAttribute bold = BoldAttribute();
 
@@ -104,6 +108,7 @@ class Attribute<T> {
   };
 
   static final Set<String> inlineKeys = {
+    Attribute.contentLine.key,
     Attribute.bold.key,
     Attribute.italic.key,
     Attribute.underline.key,
@@ -235,6 +240,10 @@ class Attribute<T> {
 
 class BoldAttribute extends Attribute<bool> {
   BoldAttribute() : super('bold', AttributeScope.INLINE, true);
+}
+
+class ContentLineAttribute extends Attribute<bool> {
+  ContentLineAttribute() : super('content-line', AttributeScope.INLINE, true);
 }
 
 class ItalicAttribute extends Attribute<bool> {
