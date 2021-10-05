@@ -9,6 +9,7 @@ typedef CursorMoveCallback = void Function(
 typedef InputShortcutCallback = void Function(InputShortcut? shortcut);
 typedef OnDeleteCallback = void Function(bool forward);
 
+// For moim.
 class QuillKeyboardListener {
   QuillKeyboardListener(this.onCursorMove, this.onShortcut, this.onDelete);
 
