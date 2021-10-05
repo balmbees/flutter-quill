@@ -43,6 +43,7 @@ class Attribute<T> {
     Attribute.link_text_block.key: Attribute.link_text_block,
     Attribute.link_preview_block.key: Attribute.link_preview_block,
     Attribute.file_block.key: Attribute.file_block,
+    Attribute.small_file_block.key: Attribute.file_block,
     Attribute.user_block.key: Attribute.user_block,
   });
 
@@ -96,6 +97,7 @@ class Attribute<T> {
       LinkPreviewAttribute('');
 
   static final FileAttribute file_block = FileAttribute('');
+  static final FileAttribute small_file_block = FileAttribute('');
 
   static final UserAttribute user_block = UserAttribute('');
 
@@ -104,6 +106,7 @@ class Attribute<T> {
     Attribute.link_text_block.key,
     Attribute.link_preview_block.key,
     Attribute.file_block.key,
+    Attribute.small_file_block.key,
     Attribute.user_block.key,
   };
 
@@ -349,6 +352,15 @@ class FileAttribute extends Attribute<String> {
   FileAttribute(dynamic data)
       : super(
           'file',
+          AttributeScope.EMBEDS,
+          data,
+        );
+}
+
+class SmallFileAttribute extends Attribute<String> {
+  SmallFileAttribute(dynamic data)
+      : super(
+          'small-file',
           AttributeScope.EMBEDS,
           data,
         );
