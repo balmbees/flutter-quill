@@ -105,7 +105,8 @@ class RawEditorState extends EditorState
   final GlobalKey _editorKey = GlobalKey();
 
   // Keyboard
-  // For moim.
+  // For moim-patched.
+  // In upgraded version, this will be solved.
   late QuillKeyboardListener _keyboardListener;
   KeyboardVisibilityController? _keyboardVisibilityController;
   StreamSubscription<bool>? _keyboardVisibilitySubscription;

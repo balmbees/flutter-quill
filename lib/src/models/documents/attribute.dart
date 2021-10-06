@@ -39,12 +39,12 @@ class Attribute<T> {
     Attribute.style.key: Attribute.style,
     Attribute.token.key: Attribute.token,
 
-    // For moim block embed data.
-    Attribute.link_text_block.key: Attribute.link_text_block,
+    // For moim-patched.
     Attribute.link_preview_block.key: Attribute.link_preview_block,
     Attribute.file_block.key: Attribute.file_block,
-    Attribute.small_file_block.key: Attribute.file_block,
-    Attribute.user_block.key: Attribute.user_block,
+    // Attribute.link_text_block.key: Attribute.link_text_block,
+    // Attribute.small_file_block.key: Attribute.file_block,
+    // Attribute.user_block.key: Attribute.user_block,
   });
 
   // For content-line.
@@ -90,24 +90,22 @@ class Attribute<T> {
 
   static final TokenAttribute token = TokenAttribute('');
 
-  // For moim block embed data.
-  static final LinkTextAttribute link_text_block = LinkTextAttribute('');
-
+  // For moim-patched.
   static final LinkPreviewAttribute link_preview_block =
       LinkPreviewAttribute('');
-
   static final FileAttribute file_block = FileAttribute('');
-  static final FileAttribute small_file_block = FileAttribute('');
 
-  static final UserAttribute user_block = UserAttribute('');
+  // static final FileAttribute small_file_block = FileAttribute('');
+  // static final LinkTextAttribute link_text_block = LinkTextAttribute('');
+  // static final UserAttribute user_block = UserAttribute('');
 
-  // For moim block embed data.
+  // For moim-patched.
   static final Set<String> embedKeys = {
-    Attribute.link_text_block.key,
     Attribute.link_preview_block.key,
     Attribute.file_block.key,
-    Attribute.small_file_block.key,
-    Attribute.user_block.key,
+    // Attribute.link_text_block.key,
+    // Attribute.small_file_block.key,
+    // Attribute.user_block.key,
   };
 
   static final Set<String> inlineKeys = {
@@ -327,18 +325,7 @@ class TokenAttribute extends Attribute<String> {
   TokenAttribute(String val) : super('token', AttributeScope.IGNORE, val);
 }
 
-// For moim block embed data.
-
-// TODO: Check the delta and content format.
-class LinkTextAttribute extends Attribute<String> {
-  LinkTextAttribute(dynamic data)
-      : super(
-          'link-text',
-          AttributeScope.EMBEDS,
-          data,
-        );
-}
-
+// For moim-patched.
 class LinkPreviewAttribute extends Attribute<String> {
   LinkPreviewAttribute(dynamic data)
       : super(
@@ -357,37 +344,29 @@ class FileAttribute extends Attribute<String> {
         );
 }
 
-class SmallFileAttribute extends Attribute<String> {
-  SmallFileAttribute(dynamic data)
-      : super(
-          'small-file',
-          AttributeScope.EMBEDS,
-          data,
-        );
-}
-
-// Example
-// For delta:
-// {
-//   "insert": {
-//     "user": "UX2KBOYAQ"
-//   },
-//   "attributes": {
-//     "user": "UX2KBOYAQ"
-//   }
-// }
-//
-// For content:
-// {
-//   "type": "text",
-//   "content": "<@UX2KBOYAQ ..."
+// class LinkTextAttribute extends Attribute<String> {
+//   LinkTextAttribute(dynamic data)
+//       : super(
+//           'link-text',
+//           AttributeScope.EMBEDS,
+//           data,
+//         );
 // }
 
-class UserAttribute extends Attribute<String> {
-  UserAttribute(dynamic data)
-      : super(
-          'user',
-          AttributeScope.EMBEDS,
-          data,
-        );
-}
+// class SmallFileAttribute extends Attribute<String> {
+//   SmallFileAttribute(dynamic data)
+//       : super(
+//           'small-file',
+//           AttributeScope.EMBEDS,
+//           data,
+//         );
+// }
+
+// class UserAttribute extends Attribute<String> {
+//   UserAttribute(dynamic data)
+//       : super(
+//           'user',
+//           AttributeScope.EMBEDS,
+//           data,
+//         );
+// }
