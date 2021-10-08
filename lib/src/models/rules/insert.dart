@@ -248,11 +248,7 @@ class InsertEmbedsRule extends InsertRule {
     final isNewlineAfter = textAfter.startsWith('\n');
 
     if (isNewlineBefore && isNewlineAfter) {
-      return delta
-        ..insert(
-          data,
-          attribute?.value,
-        );
+      return delta..insert(data, attribute?.value);
     }
 
     Map<String, dynamic>? lineStyle;
@@ -272,10 +268,7 @@ class InsertEmbedsRule extends InsertRule {
       delta.insert('\n', lineStyle);
     }
 
-    delta.insert(
-      data,
-      attribute?.value,
-    );
+    delta.insert(data, attribute?.value);
 
     if (!isNewlineAfter) {
       delta.insert('\n');

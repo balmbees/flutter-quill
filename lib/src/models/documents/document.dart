@@ -51,12 +51,8 @@ class Document {
 
   Stream<Tuple3<Delta, Delta, ChangeSource>> get changes => _observer.stream;
 
-  Delta insert(
-    int index,
-    Object? data, {
-    int replaceLength = 0,
-    Attribute? attribute,
-  }) {
+  Delta insert(int index, Object? data,
+      {int replaceLength = 0, Attribute? attribute}) {
     assert(index >= 0);
     assert(data is String || data is Embeddable);
     if (data is Embeddable) {
@@ -65,14 +61,8 @@ class Document {
       return Delta();
     }
 
-    final delta = _rules.apply(
-      RuleType.INSERT,
-      this,
-      index,
-      data: data,
-      len: replaceLength,
-      attribute: attribute,
-    );
+    final delta = _rules.apply(RuleType.INSERT, this, index,
+        data: data, len: replaceLength, attribute: attribute);
     compose(delta, ChangeSource.LOCAL);
     return delta;
   }
@@ -86,12 +76,7 @@ class Document {
     return delta;
   }
 
-  Delta replace(
-    int index,
-    int len,
-    Object? data, {
-    Attribute? attribute,
-  }) {
+  Delta replace(int index, int len, Object? data, {Attribute? attribute}) {
     assert(index >= 0);
     assert(data is String || data is Embeddable);
 
@@ -104,12 +89,7 @@ class Document {
     // We have to insert before applying delete rules
     // Otherwise delete would be operating on stale document snapshot.
     if (dataIsNotEmpty) {
-      delta = insert(
-        index,
-        data,
-        replaceLength: len,
-        attribute: attribute,
-      );
+      delta = insert(index, data, replaceLength: len, attribute: attribute);
     }
 
     if (len > 0) {

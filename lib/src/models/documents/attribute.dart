@@ -329,18 +329,9 @@ class TokenAttribute extends Attribute<String> {
 
 class LinkPreviewAttribute extends Attribute<String> {
   LinkPreviewAttribute(dynamic data)
-      : super(
-          'link-preview',
-          AttributeScope.EMBEDS,
-          data,
-        );
+      : super('link-preview', AttributeScope.EMBEDS, data);
 }
 
 class FileAttribute extends Attribute<String> {
-  FileAttribute(dynamic data)
-      : super(
-          'file',
-          AttributeScope.EMBEDS,
-          data,
-        );
+  FileAttribute(dynamic data) : super('file', AttributeScope.EMBEDS, data);
 }

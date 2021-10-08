@@ -111,23 +111,13 @@ class QuillController extends ChangeNotifier {
   bool get hasRedo => document.hasRedo;
 
   void replaceText(
-    int index,
-    int len,
-    Object? data,
-    TextSelection? textSelection, {
-    bool ignoreFocus = false,
-    Attribute? attribute,
-  }) {
+      int index, int len, Object? data, TextSelection? textSelection,
+      {bool ignoreFocus = false, Attribute? attribute}) {
     assert(data is String || data is Embeddable);
 
     Delta? delta;
     if (len > 0 || data is! String || data.isNotEmpty) {
-      delta = document.replace(
-        index,
-        len,
-        data,
-        attribute: attribute,
-      );
+      delta = document.replace(index, len, data, attribute: attribute);
       var shouldRetainDelta = toggledStyle.isNotEmpty &&
           delta.isNotEmpty &&
           delta.length <= 2 &&

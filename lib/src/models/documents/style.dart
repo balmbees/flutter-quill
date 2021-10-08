@@ -38,7 +38,7 @@ class Style {
 
   bool get isEmpty => _attributes.isEmpty;
 
-  bool get isEmbed => 
+  bool get isEmbed =>
       isNotEmpty && values.every((item) => item.scope == AttributeScope.EMBEDS);
 
   bool get isNotEmpty => _attributes.isNotEmpty;

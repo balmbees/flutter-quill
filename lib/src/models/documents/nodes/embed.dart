@@ -38,16 +38,12 @@ class BlockEmbed extends Embeddable {
   static BlockEmbed horizontalRule = const BlockEmbed(horizontalRuleType, 'hr');
 
   static const String fileType = 'file';
-  static BlockEmbed fileBlockEmbed(String fileUrl) => BlockEmbed(
-        fileType,
-        fileUrl,
-      );
+  static BlockEmbed fileBlockEmbed(String fileUrl) =>
+      BlockEmbed(fileType, fileUrl);
 
   static const String linkPreviewType = 'link-preview';
-  static BlockEmbed linkPreviewBlockEmbed(String linkUrl) => BlockEmbed(
-        linkPreviewType,
-        linkUrl,
-      );
+  static BlockEmbed linkPreviewBlockEmbed(String linkUrl) =>
+      BlockEmbed(linkPreviewType, linkUrl);
 
   static const String imageType = 'image';
   static BlockEmbed image(String imageUrl) => BlockEmbed(imageType, imageUrl);
