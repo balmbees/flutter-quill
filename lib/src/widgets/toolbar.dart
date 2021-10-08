@@ -114,7 +114,7 @@ class QuillToolbar extends StatelessWidget implements PreferredSizeWidget {
       showHeaderStyle,
       showListNumbers || showListBullets || showListCheck || showCodeBlock,
       showQuote || showIndent,
-      showLink || showHorizontalRule,
+      showLink || showHorizontalRule
     ];
 
     return QuillToolbar(
