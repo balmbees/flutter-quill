@@ -48,21 +48,23 @@ const List<String> romanNumbers = [
 
 class EditableTextBlock extends StatelessWidget {
   const EditableTextBlock(
-    this.block,
-    this.textDirection,
-    this.scrollBottomInset,
-    this.verticalSpacing,
-    this.textSelection,
-    this.color,
-    this.styles,
-    this.enableInteractiveSelection,
-    this.hasFocus,
-    this.contentPadding,
-    this.embedBuilder,
-    this.cursorCont,
-    this.indentLevelCounts,
-    this.onCheckboxTap,
-  );
+      {required this.block,
+      required this.textDirection,
+      required this.scrollBottomInset,
+      required this.verticalSpacing,
+      required this.textSelection,
+      required this.color,
+      required this.styles,
+      required this.enableInteractiveSelection,
+      required this.hasFocus,
+      required this.contentPadding,
+      required this.embedBuilder,
+      required this.cursorCont,
+      required this.indentLevelCounts,
+      required this.onCheckboxTap,
+      required this.readOnly,
+      this.customStyleBuilder,
+      Key? key});
 
   final Block block;
   final TextDirection textDirection;
@@ -75,9 +77,11 @@ class EditableTextBlock extends StatelessWidget {
   final bool hasFocus;
   final EdgeInsets? contentPadding;
   final EmbedBuilder embedBuilder;
+  final CustomStyleBuilder? customStyleBuilder;
   final CursorCont cursorCont;
   final Map<int, int> indentLevelCounts;
   final Function(int, bool) onCheckboxTap;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +125,9 @@ class EditableTextBlock extends StatelessWidget {
             line: line,
             textDirection: textDirection,
             embedBuilder: embedBuilder,
+            customStyleBuilder: customStyleBuilder,
             styles: styles!,
+            readOnly: readOnly,
           ),
           _getIndentWidth(),
           _getSpacingForLine(line, index, count, defaultStyles),
@@ -211,7 +217,14 @@ class EditableTextBlock extends StatelessWidget {
       return 16.0 + extraIndent;
     }
 
-    return 32.0 + extraIndent;
+    var baseIndent = 0.0;
+
+    if (attrs.containsKey(Attribute.list.key) ||
+        attrs.containsKey(Attribute.codeBlock.key)) {
+      baseIndent = 32.0;
+    }
+
+    return baseIndent + extraIndent;
   }
 
   Tuple2 _getSpacingForLine(
@@ -523,6 +536,27 @@ class RenderEditableTextBlock extends RenderEditableContainerBox
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     return defaultHitTestChildren(result, position: position);
+  }
+
+  @override
+  Rect getLocalRectForCaret(TextPosition position) {
+    final child = childAtPosition(position);
+    final localPosition = TextPosition(
+      offset: position.offset - child.getContainer().offset,
+      affinity: position.affinity,
+    );
+    final parentData = child.parentData as BoxParentData;
+    return child.getLocalRectForCaret(localPosition).shift(parentData.offset);
+  }
+
+  @override
+  TextPosition globalToLocalPosition(TextPosition position) {
+    assert(getContainer().containsOffset(position.offset),
+        'The provided text position is not in the current node');
+    return TextPosition(
+      offset: position.offset - getContainer().documentOffset,
+      affinity: position.affinity,
+    );
   }
 }
 

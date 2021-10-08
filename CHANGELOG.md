@@ -1,3 +1,66 @@
+## [2.0.5]
+* Support inline code formatting.
+
+## [2.0.4]
+* Enable history shortcuts for desktop.
+
+## [2.0.3]
+* Fix cursor when line contains image.
+
+## [2.0.2]
+* Address KeyboardListener class name conflict.
+
+## [2.0.1]
+* Upgrade flutter_colorpicker to 0.5.0.
+
+## [2.0.0]
+* Text Alignment functions + Block Format standards.
+
+## [1.9.6]
+* Support putting QuillEditor inside a Scrollable view.
+
+## [1.9.5]
+* Skip image when pasting.
+
+## [1.9.4]
+* Bug fix for cursor position when tapping at the end of line with image(s).
+
+## [1.9.3]
+* Bug fix when line only contains one image.
+
+## [1.9.2]
+* Support for building custom inline styles.
+
+## [1.9.1]
+* Cursor jumps to the most appropriate offset to display selection.
+
+## [1.9.0]
+* Support inline image.
+
+## [1.8.3]
+* Updated quill_delta.
+
+## [1.8.2]
+* Support mobile image alignment.
+
+## [1.8.1]
+* Support mobile custom size image.
+
+## [1.8.0]
+* Support entering link for image/video.
+
+## [1.7.3]
+* Bumps photo_view version.
+
+## [1.7.2]
+* Fix static analysis error.
+
+## [1.7.1]
+* Support Youtube video.
+
+## [1.7.0]
+* Support video.
+
 ## [1.6.4]
 * Bug fix for clear format button.
 

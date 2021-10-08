@@ -20,8 +20,10 @@ class Attribute<T> {
     Attribute.contentLine.key: Attribute.contentLine,
     Attribute.bold.key: Attribute.bold,
     Attribute.italic.key: Attribute.italic,
+    Attribute.small.key: Attribute.small,
     Attribute.underline.key: Attribute.underline,
     Attribute.strikeThrough.key: Attribute.strikeThrough,
+    Attribute.inlineCode.key: Attribute.inlineCode,
     Attribute.font.key: Attribute.font,
     Attribute.size.key: Attribute.size,
     Attribute.link.key: Attribute.link,
@@ -48,9 +50,13 @@ class Attribute<T> {
 
   static final ItalicAttribute italic = ItalicAttribute();
 
+  static final SmallAttribute small = SmallAttribute();
+
   static final UnderlineAttribute underline = UnderlineAttribute();
 
   static final StrikeThroughAttribute strikeThrough = StrikeThroughAttribute();
+
+  static final InlineCodeAttribute inlineCode = InlineCodeAttribute();
 
   static final FontAttribute font = FontAttribute(null);
 
@@ -92,6 +98,7 @@ class Attribute<T> {
     Attribute.contentLine.key,
     Attribute.bold.key,
     Attribute.italic.key,
+    Attribute.small.key,
     Attribute.underline.key,
     Attribute.strikeThrough.key,
     Attribute.link.key,
@@ -115,6 +122,13 @@ class Attribute<T> {
     Attribute.codeBlock.key,
     Attribute.blockQuote.key,
     Attribute.indent.key,
+  });
+
+  static final Set<String> exclusiveBlockKeys = LinkedHashSet.of({
+    Attribute.header.key,
+    Attribute.list.key,
+    Attribute.codeBlock.key,
+    Attribute.blockQuote.key,
   });
 
   static Attribute<int?> get h1 => HeaderAttribute(level: 1);
@@ -175,11 +189,11 @@ class Attribute<T> {
 
   Map<String, dynamic> toJson() => <String, dynamic>{key: value};
 
-  static Attribute fromKeyValue(String key, dynamic value) {
-    if (!_registry.containsKey(key)) {
-      throw ArgumentError.value(key, 'key "$key" not found.');
+  static Attribute? fromKeyValue(String key, dynamic value) {
+    final origin = _registry[key];
+    if (origin == null) {
+      return null;
     }
-    final origin = _registry[key]!;
     final attribute = clone(origin, value);
     return attribute;
   }
@@ -231,12 +245,20 @@ class ItalicAttribute extends Attribute<bool> {
   ItalicAttribute() : super('italic', AttributeScope.INLINE, true);
 }
 
+class SmallAttribute extends Attribute<bool> {
+  SmallAttribute() : super('small', AttributeScope.INLINE, true);
+}
+
 class UnderlineAttribute extends Attribute<bool> {
   UnderlineAttribute() : super('underline', AttributeScope.INLINE, true);
 }
 
 class StrikeThroughAttribute extends Attribute<bool> {
   StrikeThroughAttribute() : super('strike', AttributeScope.INLINE, true);
+}
+
+class InlineCodeAttribute extends Attribute<bool> {
+  InlineCodeAttribute() : super('code', AttributeScope.INLINE, true);
 }
 
 class FontAttribute extends Attribute<String?> {

@@ -39,10 +39,23 @@ class ResolveLineFormatRule extends FormatRule {
       final tmp = Delta();
       var offset = 0;
 
+      // Enforce Block Format exclusivity by rule
+      final removedBlocks = Attribute.exclusiveBlockKeys.contains(attribute.key)
+          ? op.attributes?.keys
+                  .where((key) =>
+                      Attribute.exclusiveBlockKeys.contains(key) &&
+                      attribute.key != key &&
+                      attribute.value != null)
+                  .map((key) => MapEntry<String, dynamic>(key, null)) ??
+              []
+          : <MapEntry<String, dynamic>>[];
+
       for (var lineBreak = text.indexOf('\n');
           lineBreak >= 0;
           lineBreak = text.indexOf('\n', offset)) {
-        tmp..retain(lineBreak - offset)..retain(1, attribute.toJson());
+        tmp
+          ..retain(lineBreak - offset)
+          ..retain(1, attribute.toJson()..addEntries(removedBlocks));
         offset = lineBreak + 1;
       }
       tmp.retain(text.length - offset);
@@ -57,7 +70,19 @@ class ResolveLineFormatRule extends FormatRule {
         delta.retain(op.length!);
         continue;
       }
-      delta..retain(lineBreak)..retain(1, attribute.toJson());
+      // Enforce Block Format exclusivity by rule
+      final removedBlocks = Attribute.exclusiveBlockKeys.contains(attribute.key)
+          ? op.attributes?.keys
+                  .where((key) =>
+                      Attribute.exclusiveBlockKeys.contains(key) &&
+                      attribute.key != key &&
+                      attribute.value != null)
+                  .map((key) => MapEntry<String, dynamic>(key, null)) ??
+              []
+          : <MapEntry<String, dynamic>>[];
+      delta
+        ..retain(lineBreak)
+        ..retain(1, attribute.toJson()..addEntries(removedBlocks));
       break;
     }
     return delta;
@@ -89,7 +114,9 @@ class FormatLinkAtCaretPositionRule extends FormatRule {
       return null;
     }
 
-    delta..retain(beg)..retain(retain!, attribute.toJson());
+    delta
+      ..retain(beg)
+      ..retain(retain!, attribute.toJson());
     return delta;
   }
 }
@@ -118,7 +145,9 @@ class ResolveInlineFormatRule extends FormatRule {
       }
       var pos = 0;
       while (lineBreak >= 0) {
-        delta..retain(lineBreak - pos, attribute.toJson())..retain(1);
+        delta
+          ..retain(lineBreak - pos, attribute.toJson())
+          ..retain(1);
         pos = lineBreak + 1;
         lineBreak = text.indexOf('\n', pos);
       }

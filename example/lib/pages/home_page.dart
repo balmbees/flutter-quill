@@ -30,66 +30,10 @@ class _HomePageState extends State<HomePage> {
     _loadFromAssets();
   }
 
-  List<Map<String, dynamic>> convertFromBlockToQuill(
-    var contentList,
-  ) {
-    // Convert format from moim block to quill delta.
-    var convertedContentList = <Map<String, dynamic>>[];
-
-    for (var content in contentList) {
-      if (content['type'] == 'text') {
-        if (content['content'] == '' || content['content'] == null) {
-          content['content'] = '\n';
-        }
-
-        var item = {
-          'insert': content['content'],
-        };
-
-        convertedContentList.add(item);
-      } else if (content['type'] == 'link-preview') {
-        convertedContentList.add(
-          {
-            'insert': {
-              // content['type'] as String: content,
-              content['type'] as String: 'link data',
-            },
-            'attributes': {
-              content['type'] as String: content,
-            }
-          },
-        );
-      }
-    }
-
-    convertedContentList.add(
-      {
-        "insert": "\n",
-      },
-    );
-
-    for (var content in convertedContentList) {
-      print('convertedContent: $content');
-    }
-
-    return convertedContentList;
-  }
-
   Future<void> _loadFromAssets() async {
     try {
-      final moimResult = await rootBundle.loadString('assets/moim_data.json');
-
       final result = await rootBundle.loadString('assets/sample_data.json');
-
-      final doc = Document.fromJson(
-        convertFromBlockToQuill(
-          jsonDecode(
-            moimResult,
-          ),
-        ),
-      );
-
-      // final doc = Document.fromJson(jsonDecode(result));
+      final doc = Document.fromJson(jsonDecode(result));
       setState(() {
         _controller = QuillController(
             document: doc, selection: const TextSelection.collapsed(offset: 0));
@@ -146,44 +90,30 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget moimEmbedBuilder(BuildContext context, Embed node) {
-    switch (node.value.type) {
-      case 'link-preview':
-        print('write link-preview');
-
-        return Text('not supported format');
-
-      default:
-        return Text('not supported format');
-    }
-  }
-
   Widget _buildWelcomeEditor(BuildContext context) {
     var quillEditor = QuillEditor(
-      controller: _controller!,
-      scrollController: ScrollController(),
-      scrollable: true,
-      focusNode: _focusNode,
-      autoFocus: false,
-      readOnly: false,
-      placeholder: 'Add content',
-      expands: false,
-      padding: EdgeInsets.zero,
-      customStyles: DefaultStyles(
-        h1: DefaultTextBlockStyle(
-            const TextStyle(
-              fontSize: 32,
-              color: Colors.black,
-              height: 1.15,
-              fontWeight: FontWeight.w300,
-            ),
-            const Tuple2(16, 0),
-            const Tuple2(0, 0),
-            null),
-        sizeSmall: const TextStyle(fontSize: 9),
-      ),
-      embedBuilder: moimEmbedBuilder,
-    );
+        controller: _controller!,
+        scrollController: ScrollController(),
+        scrollable: true,
+        focusNode: _focusNode,
+        autoFocus: false,
+        readOnly: false,
+        placeholder: 'Add content',
+        expands: false,
+        padding: EdgeInsets.zero,
+        customStyles: DefaultStyles(
+          h1: DefaultTextBlockStyle(
+              const TextStyle(
+                fontSize: 32,
+                color: Colors.black,
+                height: 1.15,
+                fontWeight: FontWeight.w300,
+              ),
+              const Tuple2(16, 0),
+              const Tuple2(0, 0),
+              null),
+          sizeSmall: const TextStyle(fontSize: 9),
+        ));
     if (kIsWeb) {
       quillEditor = QuillEditor(
           controller: _controller!,
@@ -211,19 +141,31 @@ class _HomePageState extends State<HomePage> {
           embedBuilder: defaultEmbedBuilderWeb);
     }
     var toolbar = QuillToolbar.basic(
-        controller: _controller!, onImagePickCallback: _onImagePickCallback);
+      controller: _controller!,
+      // provide a callback to enable picking images from device.
+      // if omit, "image" button only allows adding images from url.
+      // same goes for videos.
+      onImagePickCallback: _onImagePickCallback,
+      onVideoPickCallback: _onVideoPickCallback,
+      // uncomment to provide a custom "pick from" dialog.
+      // mediaPickSettingSelector: _selectMediaPickSetting,
+      showAlignmentButtons: true,
+    );
     if (kIsWeb) {
       toolbar = QuillToolbar.basic(
-          controller: _controller!,
-          onImagePickCallback: _onImagePickCallback,
-          webImagePickImpl: _webImagePickImpl);
+        controller: _controller!,
+        onImagePickCallback: _onImagePickCallback,
+        webImagePickImpl: _webImagePickImpl,
+        showAlignmentButtons: true,
+      );
     }
-    final isDesktop = !kIsWeb && !Platform.isAndroid && !Platform.isIOS;
-    if (isDesktop) {
+    if (_isDesktop()) {
       toolbar = QuillToolbar.basic(
-          controller: _controller!,
-          onImagePickCallback: _onImagePickCallback,
-          filePickImpl: openFileSystemPickerForDesktop);
+        controller: _controller!,
+        onImagePickCallback: _onImagePickCallback,
+        filePickImpl: openFileSystemPickerForDesktop,
+        showAlignmentButtons: true,
+      );
     }
 
     return SafeArea(
@@ -250,6 +192,8 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  bool _isDesktop() => !kIsWeb && !Platform.isAndroid && !Platform.isIOS;
 
   Future<String?> openFileSystemPickerForDesktop(BuildContext context) async {
     return await FilesystemPicker.open(
@@ -284,6 +228,40 @@ class _HomePageState extends State<HomePage> {
 
     return onImagePickCallback(file);
   }
+
+  // Renders the video picked by imagePicker from local file storage
+  // You can also upload the picked video to any server (eg : AWS s3
+  // or Firebase) and then return the uploaded video URL.
+  Future<String> _onVideoPickCallback(File file) async {
+    // Copies the picked file from temporary cache to applications directory
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final copiedFile =
+        await file.copy('${appDocDir.path}/${basename(file.path)}');
+    return copiedFile.path.toString();
+  }
+
+  Future<MediaPickSetting?> _selectMediaPickSetting(BuildContext context) =>
+      showDialog<MediaPickSetting>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          contentPadding: EdgeInsets.zero,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton.icon(
+                icon: const Icon(Icons.collections),
+                label: const Text('Gallery'),
+                onPressed: () => Navigator.pop(ctx, MediaPickSetting.Gallery),
+              ),
+              TextButton.icon(
+                icon: const Icon(Icons.link),
+                label: const Text('Link'),
+                onPressed: () => Navigator.pop(ctx, MediaPickSetting.Link),
+              )
+            ],
+          ),
+        ),
+      );
 
   Widget _buildMenuBar(BuildContext context) {
     final size = MediaQuery.of(context).size;

@@ -55,7 +55,6 @@ class Document {
     int index,
     Object? data, {
     int replaceLength = 0,
-    bool autoAppendNewlineAfterImage = true,
     Attribute? attribute,
   }) {
     assert(index >= 0);
@@ -74,8 +73,7 @@ class Document {
       len: replaceLength,
       attribute: attribute,
     );
-    compose(delta, ChangeSource.LOCAL,
-        autoAppendNewlineAfterImage: autoAppendNewlineAfterImage);
+    compose(delta, ChangeSource.LOCAL);
     return delta;
   }
 
@@ -92,7 +90,6 @@ class Document {
     int index,
     int len,
     Object? data, {
-    bool autoAppendNewlineAfterImage = true,
     Attribute? attribute,
   }) {
     assert(index >= 0);
@@ -111,7 +108,6 @@ class Document {
         index,
         data,
         replaceLength: len,
-        autoAppendNewlineAfterImage: autoAppendNewlineAfterImage,
         attribute: attribute,
       );
     }
@@ -161,15 +157,13 @@ class Document {
     return block.queryChild(res.offset, true);
   }
 
-  void compose(Delta delta, ChangeSource changeSource,
-      {bool autoAppendNewlineAfterImage = true}) {
+  void compose(Delta delta, ChangeSource changeSource) {
     assert(!_observer.isClosed);
     delta.trim();
     assert(delta.isNotEmpty);
 
     var offset = 0;
-    delta = _transform(delta,
-        autoAppendNewlineAfterImage: autoAppendNewlineAfterImage);
+    delta = _transform(delta);
     final originalDelta = toDelta();
     for (final op in delta.toList()) {
       final style =
@@ -213,38 +207,38 @@ class Document {
 
   bool get hasRedo => _history.hasRedo;
 
-  static Delta _transform(Delta delta,
-      {bool autoAppendNewlineAfterImage = true}) {
+  static Delta _transform(Delta delta) {
     final res = Delta();
     final ops = delta.toList();
     for (var i = 0; i < ops.length; i++) {
       final op = ops[i];
       res.push(op);
-      if (autoAppendNewlineAfterImage) {
-        _autoAppendNewlineAfterImage(i, ops, op, res);
-      }
+      _autoAppendNewlineAfterEmbeddable(i, ops, op, res, 'video');
     }
     return res;
   }
 
-  static void _autoAppendNewlineAfterImage(
-      int i, List<Operation> ops, Operation op, Delta res) {
-    final nextOpIsImage =
-        i + 1 < ops.length && ops[i + 1].isInsert && ops[i + 1].data is! String;
-    if (nextOpIsImage &&
+  static void _autoAppendNewlineAfterEmbeddable(
+      int i, List<Operation> ops, Operation op, Delta res, String type) {
+    final nextOpIsEmbed = i + 1 < ops.length &&
+        ops[i + 1].isInsert &&
+        ops[i + 1].data is Map &&
+        (ops[i + 1].data as Map).containsKey(type);
+    if (nextOpIsEmbed &&
         op.data is String &&
         (op.data as String).isNotEmpty &&
         !(op.data as String).endsWith('\n')) {
       res.push(Operation.insert('\n'));
     }
-    // Currently embed is equivalent to image and hence `is! String`
-    final opInsertImage = op.isInsert && op.data is! String;
+    // embed could be image or video
+    final opInsertEmbed =
+        op.isInsert && op.data is Map && (op.data as Map).containsKey(type);
     final nextOpIsLineBreak = i + 1 < ops.length &&
         ops[i + 1].isInsert &&
         ops[i + 1].data is String &&
         (ops[i + 1].data as String).startsWith('\n');
-    if (opInsertImage && (i + 1 == ops.length - 1 || !nextOpIsLineBreak)) {
-      // automatically append '\n' for image
+    if (opInsertEmbed && (i + 1 == ops.length - 1 || !nextOpIsLineBreak)) {
+      // automatically append '\n' for embeddable
       res.push(Operation.insert('\n'));
     }
   }

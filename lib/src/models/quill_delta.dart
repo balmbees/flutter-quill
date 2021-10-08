@@ -8,6 +8,7 @@ library quill_delta;
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:diff_match_patch/diff_match_patch.dart' as dmp;
 import 'package:quiver/core.dart';
 
 const _attributeEquality = DeepCollectionEquality();
@@ -190,6 +191,9 @@ class Delta {
   factory Delta.from(Delta other) =>
       Delta._(List<Operation>.from(other._operations));
 
+  // Placeholder char for embed in diff()
+  static final String _kNullCharacter = String.fromCharCode(0);
+
   /// Transforms two attribute sets.
   static Map<String, dynamic>? transformAttributes(
       Map<String, dynamic>? a, Map<String, dynamic>? b, bool priority) {
@@ -246,6 +250,22 @@ class Delta {
       return memo;
     }));
     return inverted;
+  }
+
+  /// Returns diff between two attribute sets
+  static Map<String, dynamic>? diffAttributes(
+      Map<String, dynamic>? a, Map<String, dynamic>? b) {
+    a ??= const {};
+    b ??= const {};
+
+    final attributes = <String, dynamic>{};
+    (a.keys.toList()..addAll(b.keys)).forEach((key) {
+      if (a![key] != b![key]) {
+        attributes[key] = b.containsKey(key) ? b[key] : null;
+      }
+    });
+
+    return attributes.keys.isNotEmpty ? attributes : null;
   }
 
   final List<Operation> _operations;
@@ -399,7 +419,7 @@ class Delta {
     if (thisIter.isNextDelete) return thisIter.next();
 
     final length = math.min(thisIter.peekLength(), otherIter.peekLength());
-    final thisOp = thisIter.next(length as int);
+    final thisOp = thisIter.next(length);
     final otherOp = otherIter.next(length);
     assert(thisOp.length == otherOp.length);
 
@@ -442,6 +462,94 @@ class Delta {
     return result..trim();
   }
 
+  /// Returns a new lazy Iterable with elements that are created by calling
+  /// f on each element of this Iterable in iteration order.
+  ///
+  /// Convenience method
+  Iterable<T> map<T>(T Function(Operation) f) {
+    return _operations.map<T>(f);
+  }
+
+  /// Returns a [Delta] containing differences between 2 [Delta]s.
+  /// If [cleanupSemantic] is `true` (default), applies the following:
+  ///
+  /// The diff of "mouse" and "sofas" is
+  ///   [delete(1), insert("s"), retain(1),
+  ///   delete("u"), insert("fa"), retain(1), delete(1)].
+  /// While this is the optimum diff, it is difficult for humans to understand.
+  /// Semantic cleanup rewrites the diff,
+  /// expanding it into a more intelligible format.
+  /// The above example would become: [(-1, "mouse"), (1, "sofas")].
+  /// (source: https://github.com/google/diff-match-patch/wiki/API)
+  ///
+  /// Useful when one wishes to display difference between 2 documents
+  Delta diff(Delta other, {bool cleanupSemantic = true}) {
+    if (_operations.equals(other._operations)) {
+      return Delta();
+    }
+    final stringThis = map((op) {
+      if (op.isInsert) {
+        return op.data is String ? op.data : _kNullCharacter;
+      }
+      final prep = this == other ? 'on' : 'with';
+      throw ArgumentError('diff() call $prep non-document');
+    }).join();
+    final stringOther = other.map((op) {
+      if (op.isInsert) {
+        return op.data is String ? op.data : _kNullCharacter;
+      }
+      final prep = this == other ? 'on' : 'with';
+      throw ArgumentError('diff() call $prep non-document');
+    }).join();
+
+    final retDelta = Delta();
+    final diffResult = dmp.diff(stringThis, stringOther);
+    if (cleanupSemantic) {
+      dmp.DiffMatchPatch().diffCleanupSemantic(diffResult);
+    }
+
+    final thisIter = DeltaIterator(this);
+    final otherIter = DeltaIterator(other);
+
+    diffResult.forEach((component) {
+      var length = component.text.length;
+      while (length > 0) {
+        var opLength = 0;
+        switch (component.operation) {
+          case dmp.DIFF_INSERT:
+            opLength = math.min(otherIter.peekLength(), length);
+            retDelta.push(otherIter.next(opLength));
+            break;
+          case dmp.DIFF_DELETE:
+            opLength = math.min(length, thisIter.peekLength());
+            thisIter.next(opLength);
+            retDelta.delete(opLength);
+            break;
+          case dmp.DIFF_EQUAL:
+            opLength = math.min(
+              math.min(thisIter.peekLength(), otherIter.peekLength()),
+              length,
+            );
+            final thisOp = thisIter.next(opLength);
+            final otherOp = otherIter.next(opLength);
+            if (thisOp.data == otherOp.data) {
+              retDelta.retain(
+                opLength,
+                diffAttributes(thisOp.attributes, otherOp.attributes),
+              );
+            } else {
+              retDelta
+                ..push(otherOp)
+                ..delete(opLength);
+            }
+            break;
+        }
+        length -= opLength;
+      }
+    });
+    return retDelta..trim();
+  }
+
   /// Transforms next operation from [otherIter] against next operation in
   /// [thisIter].
   ///
@@ -455,7 +563,7 @@ class Delta {
     }
 
     final length = math.min(thisIter.peekLength(), otherIter.peekLength());
-    final thisOp = thisIter.next(length as int);
+    final thisOp = thisIter.next(length);
     final otherOp = otherIter.next(length);
     assert(thisOp.length == otherOp.length);
 
@@ -551,14 +659,14 @@ class Delta {
     var index = 0;
     final opIterator = DeltaIterator(this);
 
-    final actualEnd = end ?? double.infinity;
+    final actualEnd = end ?? DeltaIterator.maxLength;
 
     while (index < actualEnd && opIterator.hasNext) {
       Operation op;
       if (index < start) {
         op = opIterator.next(start - index);
       } else {
-        op = opIterator.next(actualEnd - index as int);
+        op = opIterator.next(actualEnd - index);
         delta.push(op);
       }
       index += op.length!;
@@ -602,10 +710,12 @@ class Delta {
 class DeltaIterator {
   DeltaIterator(this.delta) : _modificationCount = delta._modificationCount;
 
+  static const int maxLength = 1073741824;
+
   final Delta delta;
   final int _modificationCount;
   int _index = 0;
-  num _offset = 0;
+  int _offset = 0;
 
   bool get isNextInsert => nextOperationKey == Operation.insertKey;
 
@@ -621,24 +731,32 @@ class DeltaIterator {
     }
   }
 
-  bool get hasNext => peekLength() < double.infinity;
+  bool get hasNext => peekLength() < maxLength;
 
   /// Returns length of next operation without consuming it.
   ///
-  /// Returns [double.infinity] if there is no more operations left to iterate.
-  num peekLength() {
+  /// Returns [maxLength] if there is no more operations left to iterate.
+  int peekLength() {
     if (_index < delta.length) {
       final operation = delta._operations[_index];
       return operation.length! - _offset;
     }
-    return double.infinity;
+    return maxLength;
   }
 
   /// Consumes and returns next operation.
   ///
   /// Optional [length] specifies maximum length of operation to return. Note
   /// that actual length of returned operation may be less than specified value.
-  Operation next([int length = 4294967296]) {
+  ///
+  /// If this iterator reached the end of the Delta then returns a retain
+  /// operation with its length set to [maxLength].
+  // TODO: Note that we used double.infinity as the default value
+  // for length here
+  //       but this can now cause a type error since operation length is
+  //       expected to be an int. Changing default length to [maxLength] is
+  //       a workaround to avoid breaking changes.
+  Operation next([int length = maxLength]) {
     if (_modificationCount != delta._modificationCount) {
       throw ConcurrentModificationError(delta);
     }
@@ -656,13 +774,13 @@ class DeltaIterator {
         _offset += actualLength;
       }
       final opData = op.isInsert && op.data is String
-          ? (op.data as String).substring(
-              _currentOffset as int, _currentOffset + (actualLength as int))
+          ? (op.data as String)
+              .substring(_currentOffset, _currentOffset + actualLength)
           : op.data;
       final opIsNotEmpty =
           opData is String ? opData.isNotEmpty : true; // embeds are never empty
       final opLength = opData is String ? opData.length : 1;
-      final opActualLength = opIsNotEmpty ? opLength : actualLength as int;
+      final opActualLength = opIsNotEmpty ? opLength : actualLength;
       return Operation._(opKey, opActualLength, opData, opAttributes);
     }
     return Operation.retain(length);
@@ -677,7 +795,7 @@ class DeltaIterator {
     while (skipped < length && hasNext) {
       final opLength = peekLength();
       final skip = math.min(length - skipped, opLength);
-      op = next(skip as int);
+      op = next(skip);
       skipped += op.length!;
     }
     return op;
