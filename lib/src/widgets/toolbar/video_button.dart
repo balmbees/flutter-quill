@@ -9,15 +9,15 @@ import '../toolbar.dart';
 import 'image_video_utils.dart';
 import 'quill_icon_button.dart';
 
-class ImageButton extends StatelessWidget {
-  const ImageButton({
+class VideoButton extends StatelessWidget {
+  const VideoButton({
     required this.icon,
     required this.controller,
     this.iconSize = kDefaultIconSize,
-    this.onImagePickCallback,
+    this.onVideoPickCallback,
     this.fillColor,
     this.filePickImpl,
-    this.webImagePickImpl,
+    this.webVideoPickImpl,
     this.mediaPickSettingSelector,
     Key? key,
   }) : super(key: key);
@@ -29,9 +29,9 @@ class ImageButton extends StatelessWidget {
 
   final QuillController controller;
 
-  final OnImagePickCallback? onImagePickCallback;
+  final OnVideoPickCallback? onVideoPickCallback;
 
-  final WebImagePickImpl? webImagePickImpl;
+  final WebVideoPickImpl? webVideoPickImpl;
 
   final FilePickImpl? filePickImpl;
 
@@ -52,13 +52,13 @@ class ImageButton extends StatelessWidget {
   }
 
   Future<void> _onPressedHandler(BuildContext context) async {
-    if (onImagePickCallback != null) {
+    if (onVideoPickCallback != null) {
       final selector =
           mediaPickSettingSelector ?? ImageVideoUtils.selectMediaPickSetting;
       final source = await selector(context);
       if (source != null) {
         if (source == MediaPickSetting.Gallery) {
-          _pickImage(context);
+          _pickVideo(context);
         } else {
           _typeLink(context);
         }
@@ -68,13 +68,13 @@ class ImageButton extends StatelessWidget {
     }
   }
 
-  void _pickImage(BuildContext context) => ImageVideoUtils.handleImageButtonTap(
+  void _pickVideo(BuildContext context) => ImageVideoUtils.handleVideoButtonTap(
         context,
         controller,
         ImageSource.gallery,
-        onImagePickCallback!,
+        onVideoPickCallback!,
         filePickImpl: filePickImpl,
-        webImagePickImpl: webImagePickImpl,
+        webVideoPickImpl: webVideoPickImpl,
       );
 
   void _typeLink(BuildContext context) {
@@ -89,7 +89,7 @@ class ImageButton extends StatelessWidget {
       final index = controller.selection.baseOffset;
       final length = controller.selection.extentOffset - index;
 
-      controller.replaceText(index, length, BlockEmbed.image(value), null);
+      controller.replaceText(index, length, BlockEmbed.video(value), null);
     }
   }
 }

@@ -2,12 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import '../../flutter_quill.dart';
 
 import '../models/documents/nodes/leaf.dart';
 import 'editor.dart';
 import 'text_selection.dart';
 
-typedef EmbedBuilder = Widget Function(BuildContext context, Embed node);
+typedef EmbedBuilder = Widget Function(
+    BuildContext context, Embed node, bool readOnly);
+
+typedef CustomStyleBuilder = TextStyle Function(Attribute attribute);
 
 abstract class EditorTextSelectionGestureDetectorBuilderDelegate {
   GlobalKey<EditorState> getEditableTextKey();

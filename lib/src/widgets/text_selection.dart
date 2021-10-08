@@ -407,6 +407,10 @@ class _TextSelectionHandleOverlayState
         break;
     }
 
+    if (newSelection.baseOffset >= newSelection.extentOffset) {
+      return; // don't allow order swapping.
+    }
+
     widget.onSelectionHandleChanged(newSelection);
   }
 
@@ -728,7 +732,8 @@ class _EditorTextSelectionGestureDetectorState
       gestures[LongPressGestureRecognizer] =
           GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
         () => LongPressGestureRecognizer(
-            debugOwner: this, kind: PointerDeviceKind.touch),
+            debugOwner: this,
+            supportedDevices: <PointerDeviceKind>{PointerDeviceKind.touch}),
         (instance) {
           instance
             ..onLongPressStart = _handleLongPressStart
@@ -744,7 +749,8 @@ class _EditorTextSelectionGestureDetectorState
       gestures[HorizontalDragGestureRecognizer] =
           GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
         () => HorizontalDragGestureRecognizer(
-            debugOwner: this, kind: PointerDeviceKind.mouse),
+            debugOwner: this,
+            supportedDevices: <PointerDeviceKind>{PointerDeviceKind.mouse}),
         (instance) {
           instance
             ..dragStartBehavior = DragStartBehavior.down

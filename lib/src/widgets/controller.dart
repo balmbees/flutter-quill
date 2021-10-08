@@ -14,7 +14,9 @@ class QuillController extends ChangeNotifier {
   QuillController({
     required this.document,
     required TextSelection selection,
-  }) : _selection = selection;
+    bool keepStyleOnNewLine = false,
+  })  : _selection = selection,
+        _keepStyleOnNewLine = keepStyleOnNewLine;
 
   factory QuillController.basic() {
     return QuillController(
@@ -25,6 +27,10 @@ class QuillController extends ChangeNotifier {
 
   /// Document managed by this controller.
   final Document document;
+
+  /// Tells whether to keep or reset the [toggledStyle]
+  /// when user adds a new line.
+  final bool _keepStyleOnNewLine;
 
   /// Currently selected text within the [document].
   TextSelection get selection => _selection;
@@ -79,7 +85,7 @@ class QuillController extends ChangeNotifier {
   }
 
   void _handleHistoryChange(int? len) {
-    if (len! > 0) {
+    if (len! != 0) {
       // if (this.selection.extentOffset >= document.length) {
       // // cursor exceeds the length of document, position it in the end
       // updateSelection(
@@ -106,13 +112,12 @@ class QuillController extends ChangeNotifier {
 
   void replaceText(
       int index, int len, Object? data, TextSelection? textSelection,
-      {bool ignoreFocus = false, bool autoAppendNewlineAfterImage = true}) {
+      {bool ignoreFocus = false}) {
     assert(data is String || data is Embeddable);
 
     Delta? delta;
     if (len > 0 || data is! String || data.isNotEmpty) {
-      delta = document.replace(index, len, data,
-          autoAppendNewlineAfterImage: autoAppendNewlineAfterImage);
+      delta = document.replace(index, len, data);
       var shouldRetainDelta = toggledStyle.isNotEmpty &&
           delta.isNotEmpty &&
           delta.length <= 2 &&
@@ -136,7 +141,14 @@ class QuillController extends ChangeNotifier {
       }
     }
 
-    toggledStyle = Style();
+    if (_keepStyleOnNewLine) {
+      final style = getSelectionStyle();
+      final notInlineStyle = style.attributes.values.where((s) => !s.isInline);
+      toggledStyle = style.removeAll(notInlineStyle.toSet());
+    } else {
+      toggledStyle = Style();
+    }
+
     if (textSelection != null) {
       if (delta == null || delta.isEmpty) {
         _updateSelection(textSelection, ChangeSource.LOCAL);

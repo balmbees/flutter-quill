@@ -141,19 +141,31 @@ class _HomePageState extends State<HomePage> {
           embedBuilder: defaultEmbedBuilderWeb);
     }
     var toolbar = QuillToolbar.basic(
-        controller: _controller!, onImagePickCallback: _onImagePickCallback);
+      controller: _controller!,
+      // provide a callback to enable picking images from device.
+      // if omit, "image" button only allows adding images from url.
+      // same goes for videos.
+      onImagePickCallback: _onImagePickCallback,
+      onVideoPickCallback: _onVideoPickCallback,
+      // uncomment to provide a custom "pick from" dialog.
+      // mediaPickSettingSelector: _selectMediaPickSetting,
+      showAlignmentButtons: true,
+    );
     if (kIsWeb) {
       toolbar = QuillToolbar.basic(
-          controller: _controller!,
-          onImagePickCallback: _onImagePickCallback,
-          webImagePickImpl: _webImagePickImpl);
+        controller: _controller!,
+        onImagePickCallback: _onImagePickCallback,
+        webImagePickImpl: _webImagePickImpl,
+        showAlignmentButtons: true,
+      );
     }
-    final isDesktop = !kIsWeb && !Platform.isAndroid && !Platform.isIOS;
-    if (isDesktop) {
+    if (_isDesktop()) {
       toolbar = QuillToolbar.basic(
-          controller: _controller!,
-          onImagePickCallback: _onImagePickCallback,
-          filePickImpl: openFileSystemPickerForDesktop);
+        controller: _controller!,
+        onImagePickCallback: _onImagePickCallback,
+        filePickImpl: openFileSystemPickerForDesktop,
+        showAlignmentButtons: true,
+      );
     }
 
     return SafeArea(
@@ -180,6 +192,8 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  bool _isDesktop() => !kIsWeb && !Platform.isAndroid && !Platform.isIOS;
 
   Future<String?> openFileSystemPickerForDesktop(BuildContext context) async {
     return await FilesystemPicker.open(
@@ -214,6 +228,40 @@ class _HomePageState extends State<HomePage> {
 
     return onImagePickCallback(file);
   }
+
+  // Renders the video picked by imagePicker from local file storage
+  // You can also upload the picked video to any server (eg : AWS s3
+  // or Firebase) and then return the uploaded video URL.
+  Future<String> _onVideoPickCallback(File file) async {
+    // Copies the picked file from temporary cache to applications directory
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final copiedFile =
+        await file.copy('${appDocDir.path}/${basename(file.path)}');
+    return copiedFile.path.toString();
+  }
+
+  Future<MediaPickSetting?> _selectMediaPickSetting(BuildContext context) =>
+      showDialog<MediaPickSetting>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          contentPadding: EdgeInsets.zero,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton.icon(
+                icon: const Icon(Icons.collections),
+                label: const Text('Gallery'),
+                onPressed: () => Navigator.pop(ctx, MediaPickSetting.Gallery),
+              ),
+              TextButton.icon(
+                icon: const Icon(Icons.link),
+                label: const Text('Link'),
+                onPressed: () => Navigator.pop(ctx, MediaPickSetting.Link),
+              )
+            ],
+          ),
+        ),
+      );
 
   Widget _buildMenuBar(BuildContext context) {
     final size = MediaQuery.of(context).size;

@@ -192,7 +192,9 @@ class AutoExitBlockRule extends InsertRule {
         attributes.keys.firstWhere(Attribute.blockKeysExceptHeader.contains);
     attributes[k] = null;
     // retain(1) should be '\n', set it with no attribute
-    return Delta()..retain(index + (len ?? 0))..retain(1, attributes);
+    return Delta()
+      ..retain(index + (len ?? 0))
+      ..retain(1, attributes);
   }
 }
 
@@ -270,37 +272,6 @@ class InsertEmbedsRule extends InsertRule {
       delta.insert('\n');
     }
     return delta;
-  }
-}
-
-class ForceNewlineForInsertsAroundEmbedRule extends InsertRule {
-  const ForceNewlineForInsertsAroundEmbedRule();
-
-  @override
-  Delta? applyRule(Delta document, int index,
-      {int? len, Object? data, Attribute? attribute}) {
-    if (data is! String) {
-      return null;
-    }
-
-    final text = data;
-    final itr = DeltaIterator(document);
-    final prev = itr.skip(index);
-    final cur = itr.next();
-    final cursorBeforeEmbed = cur.data is! String;
-    final cursorAfterEmbed = prev != null && prev.data is! String;
-
-    if (!cursorBeforeEmbed && !cursorAfterEmbed) {
-      return null;
-    }
-    final delta = Delta()..retain(index + (len ?? 0));
-    if (cursorBeforeEmbed && !text.endsWith('\n')) {
-      return delta..insert(text)..insert('\n');
-    }
-    if (cursorAfterEmbed && !text.startsWith('\n')) {
-      return delta..insert('\n')..insert(text);
-    }
-    return delta..insert(text);
   }
 }
 
