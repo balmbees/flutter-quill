@@ -34,7 +34,6 @@ class InsertEmbedButton extends StatelessWidget {
       onPressed: () {
         final index = controller.selection.baseOffset;
         final length = controller.selection.extentOffset - index;
-
         controller.replaceText(index, length, BlockEmbed.horizontalRule, null);
       },
     );

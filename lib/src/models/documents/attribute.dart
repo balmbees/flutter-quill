@@ -38,16 +38,10 @@ class Attribute<T> {
     Attribute.height.key: Attribute.height,
     Attribute.style.key: Attribute.style,
     Attribute.token.key: Attribute.token,
-
-    // For moim-patched.
-    Attribute.link_preview_block.key: Attribute.link_preview_block,
     Attribute.file_block.key: Attribute.file_block,
-    // Attribute.link_text_block.key: Attribute.link_text_block,
-    // Attribute.small_file_block.key: Attribute.file_block,
-    // Attribute.user_block.key: Attribute.user_block,
+    Attribute.link_preview_block.key: Attribute.link_preview_block,
   });
 
-  // For content-line.
   static final ContentLineAttribute contentLine = ContentLineAttribute();
 
   static final BoldAttribute bold = BoldAttribute();
@@ -90,23 +84,9 @@ class Attribute<T> {
 
   static final TokenAttribute token = TokenAttribute('');
 
-  // For moim-patched.
+  static final FileAttribute file_block = FileAttribute('');
   static final LinkPreviewAttribute link_preview_block =
       LinkPreviewAttribute('');
-  static final FileAttribute file_block = FileAttribute('');
-
-  // static final FileAttribute small_file_block = FileAttribute('');
-  // static final LinkTextAttribute link_text_block = LinkTextAttribute('');
-  // static final UserAttribute user_block = UserAttribute('');
-
-  // For moim-patched.
-  static final Set<String> embedKeys = {
-    Attribute.link_preview_block.key,
-    Attribute.file_block.key,
-    // Attribute.link_text_block.key,
-    // Attribute.small_file_block.key,
-    // Attribute.user_block.key,
-  };
 
   static final Set<String> inlineKeys = {
     Attribute.contentLine.key,
@@ -239,12 +219,12 @@ class Attribute<T> {
   }
 }
 
-class BoldAttribute extends Attribute<bool> {
-  BoldAttribute() : super('bold', AttributeScope.INLINE, true);
-}
-
 class ContentLineAttribute extends Attribute<bool> {
   ContentLineAttribute() : super('content-line', AttributeScope.INLINE, true);
+}
+
+class BoldAttribute extends Attribute<bool> {
+  BoldAttribute() : super('bold', AttributeScope.INLINE, true);
 }
 
 class ItalicAttribute extends Attribute<bool> {
@@ -325,7 +305,6 @@ class TokenAttribute extends Attribute<String> {
   TokenAttribute(String val) : super('token', AttributeScope.IGNORE, val);
 }
 
-// For moim-patched.
 class LinkPreviewAttribute extends Attribute<String> {
   LinkPreviewAttribute(dynamic data)
       : super(
@@ -343,30 +322,3 @@ class FileAttribute extends Attribute<String> {
           data,
         );
 }
-
-// class LinkTextAttribute extends Attribute<String> {
-//   LinkTextAttribute(dynamic data)
-//       : super(
-//           'link-text',
-//           AttributeScope.EMBEDS,
-//           data,
-//         );
-// }
-
-// class SmallFileAttribute extends Attribute<String> {
-//   SmallFileAttribute(dynamic data)
-//       : super(
-//           'small-file',
-//           AttributeScope.EMBEDS,
-//           data,
-//         );
-// }
-
-// class UserAttribute extends Attribute<String> {
-//   UserAttribute(dynamic data)
-//       : super(
-//           'user',
-//           AttributeScope.EMBEDS,
-//           data,
-//         );
-// }

@@ -14,7 +14,6 @@ abstract class InsertRule extends Rule {
   @override
   void validateArgs(int? len, Object? data, Attribute? attribute) {
     assert(data != null);
-    // TODO: Fix later.
     // assert(attribute == null);
   }
 }
