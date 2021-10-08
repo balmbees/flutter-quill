@@ -17,7 +17,6 @@ class Attribute<T> {
   final T value;
 
   static final Map<String, Attribute> _registry = LinkedHashMap.of({
-    Attribute.contentLine.key: Attribute.contentLine,
     Attribute.bold.key: Attribute.bold,
     Attribute.italic.key: Attribute.italic,
     Attribute.small.key: Attribute.small,
@@ -40,11 +39,10 @@ class Attribute<T> {
     Attribute.height.key: Attribute.height,
     Attribute.style.key: Attribute.style,
     Attribute.token.key: Attribute.token,
+    Attribute.contentLine.key: Attribute.contentLine,
     Attribute.file_block.key: Attribute.file_block,
     Attribute.link_preview_block.key: Attribute.link_preview_block,
   });
-
-  static final ContentLineAttribute contentLine = ContentLineAttribute();
 
   static final BoldAttribute bold = BoldAttribute();
 
@@ -90,7 +88,10 @@ class Attribute<T> {
 
   static final TokenAttribute token = TokenAttribute('');
 
+  static final ContentLineAttribute contentLine = ContentLineAttribute();
+
   static final FileAttribute file_block = FileAttribute('');
+
   static final LinkPreviewAttribute link_preview_block =
       LinkPreviewAttribute('');
 
@@ -233,10 +234,6 @@ class Attribute<T> {
   }
 }
 
-class ContentLineAttribute extends Attribute<bool> {
-  ContentLineAttribute() : super('content-line', AttributeScope.INLINE, true);
-}
-
 class BoldAttribute extends Attribute<bool> {
   BoldAttribute() : super('bold', AttributeScope.INLINE, true);
 }
@@ -325,6 +322,10 @@ class StyleAttribute extends Attribute<String?> {
 
 class TokenAttribute extends Attribute<String> {
   TokenAttribute(String val) : super('token', AttributeScope.IGNORE, val);
+}
+
+class ContentLineAttribute extends Attribute<bool> {
+  ContentLineAttribute() : super('content-line', AttributeScope.INLINE, true);
 }
 
 class LinkPreviewAttribute extends Attribute<String> {
