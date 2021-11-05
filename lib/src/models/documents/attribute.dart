@@ -39,6 +39,7 @@ class Attribute<T> {
     Attribute.style.key: Attribute.style,
     Attribute.token.key: Attribute.token,
     Attribute.file_block.key: Attribute.file_block,
+    Attribute.image_block.key: Attribute.image_block,
     Attribute.link_preview_block.key: Attribute.link_preview_block,
   });
 
@@ -85,6 +86,7 @@ class Attribute<T> {
   static final TokenAttribute token = TokenAttribute('');
 
   static final FileAttribute file_block = FileAttribute('');
+  static final ImageAttribute image_block = ImageAttribute('');
   static final LinkPreviewAttribute link_preview_block =
       LinkPreviewAttribute('');
 
@@ -318,6 +320,15 @@ class FileAttribute extends Attribute<String> {
   FileAttribute(dynamic data)
       : super(
           'file',
+          AttributeScope.EMBEDS,
+          data,
+        );
+}
+
+class ImageAttribute extends Attribute<String> {
+  ImageAttribute(dynamic data)
+      : super(
+          'image',
           AttributeScope.EMBEDS,
           data,
         );
