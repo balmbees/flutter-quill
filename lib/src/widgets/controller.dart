@@ -58,16 +58,12 @@ class QuillController extends ChangeNotifier {
   /// Only attributes applied to all characters within this range are
   /// included in the result.
   Style getSelectionStyle() {
-    return document
-        .collectStyle(selection.start, selection.end - selection.start)
-        .mergeAll(toggledStyle);
+    return document.collectStyle(selection.start, selection.end - selection.start).mergeAll(toggledStyle);
   }
 
   /// Returns all styles for any character within the specified text range.
   List<Style> getAllSelectionStyles() {
-    final styles = document.collectAllStyles(
-        selection.start, selection.end - selection.start)
-      ..add(toggledStyle);
+    final styles = document.collectAllStyles(selection.start, selection.end - selection.start)..add(toggledStyle);
     return styles;
   }
 
@@ -84,9 +80,7 @@ class QuillController extends ChangeNotifier {
       // // cursor exceeds the length of document, position it in the end
       // updateSelection(
       // TextSelection.collapsed(offset: document.length), ChangeSource.LOCAL);
-      updateSelection(
-          TextSelection.collapsed(offset: selection.baseOffset + len),
-          ChangeSource.LOCAL);
+      updateSelection(TextSelection.collapsed(offset: selection.baseOffset + len), ChangeSource.LOCAL);
     } else {
       // no need to move cursor
       notifyListeners();
@@ -124,17 +118,10 @@ class QuillController extends ChangeNotifier {
         autoAppendNewlineAfterImage: autoAppendNewlineAfterImage,
         attribute: attribute,
       );
-      var shouldRetainDelta = toggledStyle.isNotEmpty &&
-          delta.isNotEmpty &&
-          delta.length <= 2 &&
-          delta.last.isInsert;
-      if (shouldRetainDelta &&
-          toggledStyle.isNotEmpty &&
-          delta.length == 2 &&
-          delta.last.data == '\n') {
+      var shouldRetainDelta = toggledStyle.isNotEmpty && delta.isNotEmpty && delta.length <= 2 && delta.last.isInsert;
+      if (shouldRetainDelta && toggledStyle.isNotEmpty && delta.length == 2 && delta.last.data == '\n') {
         // if all attributes are inline, shouldRetainDelta should be false
-        final anyAttributeNotInline =
-            toggledStyle.values.any((attr) => !attr.isInline);
+        final anyAttributeNotInline = toggledStyle.values.any((attr) => !attr.isInline);
         if (!anyAttributeNotInline) {
           shouldRetainDelta = false;
         }
@@ -175,16 +162,13 @@ class QuillController extends ChangeNotifier {
   }
 
   void formatText(int index, int len, Attribute? attribute) {
-    if (len == 0 &&
-        attribute!.isInline &&
-        attribute.key != Attribute.link.key) {
+    if (len == 0 && attribute!.isInline && attribute.key != Attribute.link.key) {
       toggledStyle = toggledStyle.put(attribute);
     }
 
     final change = document.format(index, len, attribute);
-    final adjustedSelection = selection.copyWith(
-        baseOffset: change.transformPosition(selection.baseOffset),
-        extentOffset: change.transformPosition(selection.extentOffset));
+    final adjustedSelection =
+        selection.copyWith(baseOffset: change.transformPosition(selection.baseOffset), extentOffset: change.transformPosition(selection.extentOffset));
     if (selection != adjustedSelection) {
       _updateSelection(adjustedSelection, ChangeSource.LOCAL);
     }
@@ -206,9 +190,7 @@ class QuillController extends ChangeNotifier {
     }
 
     textSelection = selection.copyWith(
-        baseOffset: delta.transformPosition(selection.baseOffset, force: false),
-        extentOffset:
-            delta.transformPosition(selection.extentOffset, force: false));
+        baseOffset: delta.transformPosition(selection.baseOffset, force: false), extentOffset: delta.transformPosition(selection.extentOffset, force: false));
     if (selection != textSelection) {
       _updateSelection(textSelection, source);
     }
@@ -247,8 +229,18 @@ class QuillController extends ChangeNotifier {
   void _updateSelection(TextSelection textSelection, ChangeSource source) {
     _selection = textSelection;
     final end = document.length - 1;
-    _selection = selection.copyWith(
-        baseOffset: math.min(selection.baseOffset, end),
-        extentOffset: math.min(selection.extentOffset, end));
+    _selection = selection.copyWith(baseOffset: math.min(selection.baseOffset, end), extentOffset: math.min(selection.extentOffset, end));
+  }
+
+  /// Clipboard for image url and its corresponding style
+  /// item1 is url and item2 is style string
+  Tuple2<String, String>? _copiedImageUrl;
+
+  Tuple2<String, String>? get copiedImageUrl => _copiedImageUrl;
+
+  set copiedImageUrl(Tuple2<String, String>? value) {
+    // do nothing
+    // _copiedImageUrl = value;
+    // Clipboard.setData(const ClipboardData(text: ''));
   }
 }
