@@ -649,12 +649,52 @@ class RawEditorState extends EditorState
 
   @override
   void copySelection(SelectionChangedCause cause) {
-    // TODO: implement copySelection
+    widget.controller.copiedImageUrl = null;
+    
+    final selection = textEditingValue.selection;
+    final text = textEditingValue.text;
+    if (selection.isCollapsed) {
+      return;
+    }
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+
+    if (cause == SelectionChangedCause.toolbar) {
+      bringIntoView(textEditingValue.selection.extent);
+      // on iOS, Safari does not hide the selection after copy
+      // however, most other iOS apps do as well as other platforms
+      // so we'll hide toolbar & selection after copy
+      hideToolbar(false);
+
+      // Collapse the selection and hide the toolbar and handles.
+      userUpdateTextEditingValue(
+        TextEditingValue(
+          text: textEditingValue.text,
+          selection:
+              TextSelection.collapsed(offset: textEditingValue.selection.end),
+        ),
+        SelectionChangedCause.toolbar,
+      );
+    }
   }
 
   @override
   void cutSelection(SelectionChangedCause cause) {
-    // TODO: implement cutSelection
+    if (widget.readOnly) {
+      return;
+    }
+
+    final selection = textEditingValue.selection;
+    final text = textEditingValue.text;
+    if (selection.isCollapsed) {
+      return;
+    }
+    Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    _replaceText(ReplaceTextIntent(textEditingValue, '', selection, cause));
+
+    if (cause == SelectionChangedCause.toolbar) {
+      bringIntoView(textEditingValue.selection.extent);
+      hideToolbar();
+    }
   }
 
   @override
