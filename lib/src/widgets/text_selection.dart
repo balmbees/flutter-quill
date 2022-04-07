@@ -77,6 +77,8 @@ class EditorTextSelectionOverlay {
     required this.selectionCtrls,
     required this.selectionDelegate,
     required this.clipboardStatus,
+    required this.onDragSelectionStart,
+    required this.onDragSelectionUpdate,
     this.onSelectionHandleTapped,
     this.dragStartBehavior = DragStartBehavior.start,
     this.handlesVisible = false,
@@ -178,6 +180,9 @@ class EditorTextSelectionOverlay {
   /// A copy/paste toolbar.
   OverlayEntry? toolbar;
 
+  final void Function(DragStartDetails details) onDragSelectionStart;
+  final void Function(DragUpdateDetails details) onDragSelectionUpdate;
+
   TextSelection get _selection => value.selection;
 
   Animation<double> get _toolbarOpacity => _toolbarController.view;
@@ -239,6 +244,8 @@ class EditorTextSelectionOverlay {
             _handleSelectionHandleChanged(newSelection, position);
           },
           onSelectionHandleTapped: onSelectionHandleTapped,
+          onDragSelectionStart: onDragSelectionStart,
+          onDragSelectionUpdate: onDragSelectionUpdate,
           startHandleLayerLink: startHandleLayerLink,
           endHandleLayerLink: endHandleLayerLink,
           renderObject: renderObject,
@@ -416,6 +423,8 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     required this.onSelectionHandleChanged,
     required this.onSelectionHandleTapped,
     required this.selectionControls,
+    required this.onDragSelectionStart,
+    required this.onDragSelectionUpdate,
     this.dragStartBehavior = DragStartBehavior.start,
     Key? key,
   }) : super(key: key);
@@ -427,6 +436,8 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final RenderEditor renderObject;
   final ValueChanged<TextSelection?> onSelectionHandleChanged;
   final VoidCallback? onSelectionHandleTapped;
+  final void Function(DragStartDetails details) onDragSelectionStart;
+  final void Function(DragUpdateDetails details) onDragSelectionUpdate;
   final TextSelectionControls selectionControls;
   final DragStartBehavior dragStartBehavior;
 
@@ -497,9 +508,11 @@ class _TextSelectionHandleOverlayState
     final lineHeight = widget.renderObject.preferredLineHeight(textPosition);
     final handleSize = widget.selectionControls.getHandleSize(lineHeight);
     _dragPosition = details.globalPosition + Offset(0, -handleSize.height);
+    widget.onDragSelectionStart(details);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
+    widget.onDragSelectionUpdate(details);
     _dragPosition += details.delta;
     final position =
         widget.renderObject.getPositionForOffset(details.globalPosition);

@@ -46,6 +46,8 @@ class RawEditor extends StatefulWidget {
       required this.cursorStyle,
       required this.selectionColor,
       required this.selectionCtrls,
+      required this.onDragSelectionStart,
+      required this.onDragSelectionUpdate,
       Key? key,
       this.scrollable = true,
       this.padding = EdgeInsets.zero,
@@ -225,6 +227,9 @@ class RawEditor extends StatefulWidget {
   final LinkActionPickerDelegate linkActionPickerDelegate;
   final CustomStyleBuilder? customStyleBuilder;
   final bool floatingCursorDisabled;
+
+  final void Function(DragStartDetails details) onDragSelectionStart;
+  final void Function(DragUpdateDetails details) onDragSelectionUpdate;
 
   @override
   State<StatefulWidget> createState() => RawEditorState();
@@ -753,6 +758,8 @@ class RawEditorState extends EditorState
         selectionCtrls: widget.selectionCtrls,
         selectionDelegate: this,
         clipboardStatus: _clipboardStatus,
+        onDragSelectionStart: widget.onDragSelectionStart,
+        onDragSelectionUpdate: widget.onDragSelectionUpdate,
       );
       _selectionOverlay!.handlesVisible = _shouldShowSelectionHandles();
       _selectionOverlay!.showHandles();
