@@ -373,16 +373,8 @@ class QuillEditor extends StatefulWidget {
   final void Function(DragStartDetails details)? onDragSelectionStart;
   final void Function(DragUpdateDetails details)? onDragSelectionUpdate;
 
-  TextPosition getTextPositionFromOffset(Offset offset) =>
-      (_state._selectionGestureDetectorBuilder
-              as _QuillEditorSelectionGestureDetectorBuilder)
-          .renderEditor!
-          .getPositionForOffset(offset);
-
-  final _state = QuillEditorState();
-
   @override
-  QuillEditorState createState() => _state;
+  QuillEditorState createState() => QuillEditorState();
 }
 
 class QuillEditorState extends State<QuillEditor>
@@ -396,6 +388,8 @@ class QuillEditorState extends State<QuillEditor>
     super.initState();
     _selectionGestureDetectorBuilder =
         _QuillEditorSelectionGestureDetectorBuilder(this);
+    widget.controller.selectionGestureDetectorBuilder =
+        _selectionGestureDetectorBuilder;
   }
 
   @override

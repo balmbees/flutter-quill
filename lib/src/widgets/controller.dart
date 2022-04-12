@@ -11,6 +11,7 @@ import '../models/documents/nodes/leaf.dart';
 import '../models/documents/style.dart';
 import '../models/quill_delta.dart';
 import '../utils/delta.dart';
+import 'delegate.dart';
 
 typedef ReplaceTextCallback = bool Function(int index, int len, Object? data);
 typedef DeleteCallback = void Function(int cursorPosition, bool forward);
@@ -54,6 +55,8 @@ class QuillController extends ChangeNotifier {
 
   void Function()? onSelectionCompleted;
   void Function(TextSelection textSelection)? onSelectionChanged;
+
+  EditorTextSelectionGestureDetectorBuilder? selectionGestureDetectorBuilder;
 
   /// Store any styles attribute that got toggled by the tap of a button
   /// and that has not been applied yet.
@@ -322,6 +325,11 @@ class QuillController extends ChangeNotifier {
     _isDisposed = true;
     super.dispose();
   }
+
+  TextPosition getTextPositionFromOffset(Offset offset) =>
+      (selectionGestureDetectorBuilder as dynamic)
+          .renderEditor!
+          .getPositionForOffset(offset);
 
   void _updateSelection(TextSelection textSelection, ChangeSource source) {
     _selection = textSelection;
